@@ -45,6 +45,7 @@ namespace MyERPSecondDevTools.Common
             var factorNum = totalCount / 4;
             var currentNum = 0;
 
+            //下载源码任务方法
             Func<IEnumerable<string>, List<MyERPBusinessJsModel>> downLoadBody = param =>
             {
                 WebClient webClient = new WebClient();

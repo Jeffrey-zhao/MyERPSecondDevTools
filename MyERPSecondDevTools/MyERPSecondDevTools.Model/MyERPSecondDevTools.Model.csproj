@@ -42,6 +42,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\MyERPBusinessJsModel.cs" />
+    <Compile Include="Model\MyERPBusinessJsSyntaxTreeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

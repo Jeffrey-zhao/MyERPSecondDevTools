@@ -1,4 +1,5 @@
 ﻿using MyERPSecondDevTools.Common;
+using MyERPSecondDevTools.Model.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
@@ -169,6 +170,7 @@ namespace MyERPSecondDevTools
         {
             if (!webBrowser.Url.AbsoluteUri.Contains("?applicationId="))
             {
+                //ERP站点
                 while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
                 {
                     Application.DoEvents();
@@ -178,7 +180,10 @@ namespace MyERPSecondDevTools
             }
             else
             {
-                richTextBox1.Text = webBrowser.Document.Body.OuterHtml;
+                //JS语法解析站点
+                richTextBox1.Text = webBrowser.Document.All[1].OuterHtml;
+                //获取JS语法树数据
+                GetJsSyntaxTree(richTextBox1.Text);
             }
         }
 
@@ -195,6 +200,9 @@ namespace MyERPSecondDevTools
             HtmlAgilityPack(richTextBox1.Text);
         }
 
+        #endregion
+
+        #region 解析获取的ERP网页源码数据
         /// <summary>
         /// 解析ERP二开页面HTML
         /// </summary>
@@ -214,7 +222,7 @@ namespace MyERPSecondDevTools
                 "/_frontend/"
             };
 
-            Func<string, bool> ignoreScriptFuc = (string path) =>
+            Func<string, bool> ignoreScriptFuc = path =>
             {
                 return !ignoreScripts.Any(p => path.Contains(p));
             };
@@ -233,6 +241,26 @@ namespace MyERPSecondDevTools
             FiddlerHelper.GetERPBusinessJsModels(businessScripts);
             //跳转到JS解析站点
             webBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
+        }
+
+        /// <summary>
+        /// 获取JS语法树数据
+        /// </summary>
+        /// <param name="responseHtml">解析站点响应的HTML</param>
+        public void GetJsSyntaxTree(string responseHtml)
+        {
+            List<MyERPBusinessJsSyntaxTreeModel> jsSyntaxTreeModels = new List<MyERPBusinessJsSyntaxTreeModel>();
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(responseHtml);
+            var divList = doc.DocumentNode.SelectNodes("/html/body/div");
+            foreach (var item in divList)
+            {
+                jsSyntaxTreeModels.Add(new MyERPBusinessJsSyntaxTreeModel
+                {
+                    JsName = item.Attributes["id"].Value,
+                    JsSyntaxTreeJson = item.InnerHtml
+                });
+            }
         }
         #endregion
     }
