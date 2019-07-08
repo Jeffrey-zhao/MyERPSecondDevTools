@@ -256,13 +256,36 @@ namespace MyERPSecondDevTools
         /// <param name="resHtml"></param>
         private void HtmlAgilityPack(string resHtml)
         {
+            //忽略的非业务JS或者关键路径
+            var ignoreScripts = new List<string>
+            {
+                "template.js",
+                "Helper.js",
+                "mapnumber.js",
+                "CodeFormat.js",
+                "BindData.js",
+                "underscoreDeepExtend.js",
+                "/_common/",
+                "/_frontend/"
+            };
+
+            Func<string, bool> ignoreScriptFuc = (string path) =>
+            {
+                return !ignoreScripts.Any(p => path.Contains(p));
+            };
+
+            var businessScripts = new List<string>();
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(resHtml);
             var scriptList = doc.DocumentNode.SelectNodes("/html/head/script");
             foreach (var item in scriptList)
             {
-
+                if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                {
+                    businessScripts.Add(item.Attributes["src"].Value);
+                }
             }
+            FiddlerHelper.GetERPBusinessJsModels(businessScripts);
         }
         #endregion
     }

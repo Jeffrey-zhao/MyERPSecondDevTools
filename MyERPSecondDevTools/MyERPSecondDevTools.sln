@@ -5,6 +5,8 @@ VisualStudioVersion = 15.0.28307.572
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyERPSecondDevTools", "MyERPSecondDevTools\MyERPSecondDevTools.csproj", "{7E58A20A-036B-4B49-83E5-A435E53635E3}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MyERPSecondDevTools.Model", "MyERPSecondDevTools.Model\MyERPSecondDevTools.Model.csproj", "{31813467-9B17-45A2-8926-86B263709075}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +17,10 @@ Global
 		{7E58A20A-036B-4B49-83E5-A435E53635E3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E58A20A-036B-4B49-83E5-A435E53635E3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E58A20A-036B-4B49-83E5-A435E53635E3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{31813467-9B17-45A2-8926-86B263709075}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{31813467-9B17-45A2-8926-86B263709075}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{31813467-9B17-45A2-8926-86B263709075}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{31813467-9B17-45A2-8926-86B263709075}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

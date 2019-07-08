@@ -153,5 +153,11 @@
       <Install>false</Install>
     </BootstrapperPackage>
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\MyERPSecondDevTools.Model\MyERPSecondDevTools.Model.csproj">
+      <Project>{31813467-9B17-45A2-8926-86B263709075}</Project>
+      <Name>MyERPSecondDevTools.Model</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
