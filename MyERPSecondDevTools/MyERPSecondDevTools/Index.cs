@@ -100,8 +100,11 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void toolStripHistory_Click(object sender, EventArgs e)
         {
-            toolErpPathLabel.Text = sender.ToString();
-            GlobalData.InitERPData(sender.ToString());
+            if (FolderHelper.GetFoldersIsExists(sender.ToString(), "bin", "Customize", "App_Data"))
+            {
+                toolErpPathLabel.Text = sender.ToString();
+                GlobalData.InitERPData(sender.ToString());
+            }
         }
 
         /// <summary>

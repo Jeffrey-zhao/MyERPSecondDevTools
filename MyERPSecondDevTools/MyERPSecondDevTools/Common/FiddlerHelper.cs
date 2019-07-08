@@ -12,7 +12,7 @@ namespace MyERPSecondDevTools.Common
     public class FiddlerHelper
     {
         /// <summary>
-        /// 获取ERP页面响应内容
+        /// 获取ERP二开单点登录跳转地址
         /// </summary>
         /// <param name="pageUrl"></param>
         public static string GetERPNavigationPageUrl(string pageUrl)
