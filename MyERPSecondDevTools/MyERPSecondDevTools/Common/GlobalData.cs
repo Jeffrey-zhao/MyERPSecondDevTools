@@ -44,5 +44,15 @@ namespace MyERPSecondDevTools.Common
         /// JS解析站点的地址
         /// </summary>
         public static string ToolsJsSyntaxAnalysisWebSite { get { return ConfigurationManager.AppSettings["ToolsJsSyntaxAnalysisWebSite"]; } }
+
+        /// <summary>
+        /// ERP AppId
+        /// </summary>
+        public static string ERPPubAppId { get; set; }
+
+        /// <summary>
+        /// ERP AppKey
+        /// </summary>
+        public static string ERPPubAppKey { get; set; }
     }
 }

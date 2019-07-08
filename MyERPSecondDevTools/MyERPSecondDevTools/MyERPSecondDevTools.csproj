@@ -89,6 +89,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Common\AppDataHelper.cs" />
+    <Compile Include="Common\ERPWebRequestHelper.cs" />
     <Compile Include="Common\FiddlerHelper.cs" />
     <Compile Include="Common\FolderHelper.cs" />
     <Compile Include="Common\GlobalData.cs" />

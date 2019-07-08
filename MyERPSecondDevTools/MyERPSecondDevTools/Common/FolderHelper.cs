@@ -70,6 +70,7 @@ namespace MyERPSecondDevTools.Common
             }
 
             InitOALogin();
+            InitPubInterface();
         }
 
         /// <summary>
@@ -83,6 +84,20 @@ namespace MyERPSecondDevTools.Common
             if (!isEnable)
             {
                 sqlHelper.ExecuteNonQuery("UPDATE p_OAIntegrateConfig SET IsEnable = 1 WHERE SchemeCode = 'Code'");
+            }
+        }
+
+        /// <summary>
+        /// 初始化ERP接口AppKey
+        /// </summary>
+        private static void InitPubInterface()
+        {
+            SqlHelper sqlHelper = new SqlHelper(GlobalData.ERPSQLConnectionString);
+            var pubData = sqlHelper.ExecuteReader("SELECT TOP 1 AppId, AppKey FROM myOpenApiIdentity WHERE IsSystem = 1");
+            if(pubData != null && pubData.Count > 0)
+            {
+                GlobalData.ERPPubAppId = pubData[0]["AppId"];
+                GlobalData.ERPPubAppKey = pubData[0]["AppKey"];
             }
         }
     }

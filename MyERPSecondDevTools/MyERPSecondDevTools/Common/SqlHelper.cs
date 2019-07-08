@@ -51,7 +51,6 @@ namespace MyERPSecondDevTools.Common
         /// <returns></returns>
         public int ExecuteNonQuery(string sql, SqlParameter[] parameters = null)
         {
-
             using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
@@ -62,6 +61,42 @@ namespace MyERPSecondDevTools.Common
                         cmd.Parameters.AddRange(parameters);
                     return cmd.ExecuteNonQuery();
                 }
+            }
+        }
+
+        /// <summary>
+        /// 执行读取操作
+        /// </summary>
+        /// <param name="sql"></param>
+        /// <param name="parameters"></param>
+        /// <returns></returns>
+        public List<Dictionary<string, string>> ExecuteReader(string sql, SqlParameter[] parameters = null)
+        {
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
+            {
+                List<Dictionary<string, string>> result = new List<Dictionary<string, string>>();
+                conn.Open();
+                using (SqlCommand cmd = conn.CreateCommand())
+                {
+                    cmd.CommandText = sql;
+                    if (parameters != null)
+                        cmd.Parameters.AddRange(parameters);
+                    SqlDataReader dataReader = cmd.ExecuteReader();
+                    if (dataReader.HasRows)
+                    {
+                        while (dataReader.Read())
+                        {
+                            Dictionary<string, string> dict = new Dictionary<string, string>();
+                            for (int i = 0; i < dataReader.FieldCount; i++)
+                            {
+                                dict.Add(dataReader.GetName(i), dataReader[dataReader.GetName(i)].ToString());
+                            }
+                            result.Add(dict);
+                        }
+                    }
+                }
+
+                return result;
             }
         }
     }
