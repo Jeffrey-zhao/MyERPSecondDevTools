@@ -8,10 +8,12 @@ var db = function(strsql) {
         }).
         catch(function(err) {
             reject(err)
+            sqlserver.close();
         });
     }).
     catch(function(err) {
         reject(err)
+        sqlserver.close();
     });
     })
 };
