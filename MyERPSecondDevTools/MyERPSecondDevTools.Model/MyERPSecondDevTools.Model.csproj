@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Model\AppDataModel.cs" />
     <Compile Include="Model\MyERPBusinessJsModel.cs" />
     <Compile Include="Model\MyERPBusinessJsSyntaxTreeModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

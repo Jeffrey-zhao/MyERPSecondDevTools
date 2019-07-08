@@ -29,6 +29,7 @@ namespace MyERPSecondDevTools
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
+            this.richTextBox1.Text = GlobalData.ApplicationId.ToString();
         }
 
         /// <summary>
@@ -218,6 +219,7 @@ namespace MyERPSecondDevTools
                 "CodeFormat.js",
                 "BindData.js",
                 "underscoreDeepExtend.js",
+                "LangRes.js",
                 "/_common/",
                 "/_frontend/"
             };

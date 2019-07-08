@@ -115,7 +115,7 @@
             // 
             // timer_GetResponse
             // 
-            this.timer_GetResponse.Interval = 1000;
+            this.timer_GetResponse.Interval = 50;
             this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
             // 
             // MyERPSecondDevTools

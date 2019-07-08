@@ -38,7 +38,7 @@ namespace MyERPSecondDevTools.Common
         /// <summary>
         /// 全局应用ID
         /// </summary>
-        public static Guid ApplicationId { get { return Guid.NewGuid(); } }
+        public static Guid ApplicationId { get { return AppDataHelper.GetApplicationId(); } }
 
         /// <summary>
         /// JS解析站点的地址
