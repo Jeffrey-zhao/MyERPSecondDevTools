@@ -58,10 +58,12 @@ namespace MyERPSecondDevTools
             {
                 if (FolderHelper.GetFoldersIsExists(dialog.SelectedPath, "bin", "Customize", "App_Data"))
                 {
-                    GlobalData.InitERPData(dialog.SelectedPath);
+                    FolderHelper.InitERPData(dialog.SelectedPath);
                     toolErpPathLabel.Text = dialog.SelectedPath;
                     //写入选择历史
-                    WriteERPPathHistory(dialog.SelectedPath);
+                    AppDataHelper.WriteERPPathHistory(dialog.SelectedPath);
+                    //重载目录历史
+                    InitHistoryERPPath(dialog.SelectedPath);
                 }
                 else
                     MessageBox.Show("您选择目录不是ERP站点目录，请重新选择");
@@ -77,7 +79,7 @@ namespace MyERPSecondDevTools
             if (string.IsNullOrEmpty(path))
             {
                 //初次加载，展示所有记录
-                var historyPaths = ReadERPPathHistory();
+                var historyPaths = AppDataHelper.ReadERPPathHistory();
                 if (historyPaths != null)
                 {
                     foreach (var erpPath in historyPaths)
@@ -103,75 +105,11 @@ namespace MyERPSecondDevTools
             if (FolderHelper.GetFoldersIsExists(sender.ToString(), "bin", "Customize", "App_Data"))
             {
                 toolErpPathLabel.Text = sender.ToString();
-                GlobalData.InitERPData(sender.ToString());
+                FolderHelper.InitERPData(sender.ToString());
             }
         }
 
-        /// <summary>
-        /// 写入ERP目录选择历史
-        /// </summary>
-        /// <param name="path">路径</param>
-        private void WriteERPPathHistory(string path)
-        {
-            var historyPaths = ReadERPPathHistory();
-            if (!historyPaths.Contains(path))
-            {
-                historyPaths.Add(path);
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/erpPathHistory.json";
-                if (!File.Exists(filePath))
-                {
-                    var emptyData = new
-                    {
-                        path = new List<string>()
-                    };
-                    string emptyString = JsonConvert.SerializeObject(emptyData, Formatting.Indented);
-                    //File.Create(filePath);
-                    File.WriteAllText(filePath, emptyString);
-                }
-
-                string json = File.ReadAllText(filePath);
-                var jsonObj = JsonConvert.DeserializeObject<Dictionary<string, List<string>>>(json);
-                jsonObj["path"] = historyPaths;
-                string output = JsonConvert.SerializeObject(jsonObj, Formatting.Indented);
-                File.WriteAllText(filePath, output);
-
-                //重载目录历史
-                InitHistoryERPPath(path);
-            }
-        }
-
-        /// <summary>
-        /// 读取ERP目录历史记录
-        /// </summary>
-        private List<string> ReadERPPathHistory()
-        {
-            try
-            {
-                List<string> historyPaths = new List<string>();
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/erpPathHistory.json";
-                if (File.Exists(filePath))
-                {
-                    StreamReader file = File.OpenText(filePath);
-                    JsonTextReader reader = new JsonTextReader(file);
-                    JObject jsonObject = (JObject)JToken.ReadFrom(reader);
-                    var paths = jsonObject["path"];
-                    foreach (var item in paths)
-                    {
-                        historyPaths.Add(item.ToString());
-                    }
-                    file.Close();
-                }
-
-                return historyPaths;
-            }
-            catch
-            {
-                return null;
-            }
-        }
-
+        
         /// <summary>
         /// 加载页面地址框PlaceHolder
         /// </summary>

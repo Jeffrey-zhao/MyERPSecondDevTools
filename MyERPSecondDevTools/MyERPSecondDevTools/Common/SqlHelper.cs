@@ -9,10 +9,17 @@ namespace MyERPSecondDevTools.Common
 {
     public class SqlHelper
     {
+        private SqlHelper() { }
+
+        public SqlHelper(string connectionString)
+        {
+            ConnectionString = connectionString;
+        }
+
         /// <summary>
         /// ERP数据库连接字符串
         /// </summary>
-        public static string ConnStr { get; set; }
+        public static string ConnectionString { get; set; }
 
         /// <summary>
         /// 执行查询语句返回结果集合的第一行第一列
@@ -21,9 +28,9 @@ namespace MyERPSecondDevTools.Common
         /// <param name="sql"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static object ExecuteScalar(string sql, SqlParameter[] parameters = null)
+        public object ExecuteScalar(string sql, SqlParameter[] parameters = null)
         {
-            using (SqlConnection conn = new SqlConnection(ConnStr))
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())
@@ -42,10 +49,10 @@ namespace MyERPSecondDevTools.Common
         /// <param name="sql"></param>
         /// <param name="parameters"></param>
         /// <returns></returns>
-        public static int ExecuteNonQuery(string sql, SqlParameter[] parameters = null)
+        public int ExecuteNonQuery(string sql, SqlParameter[] parameters = null)
         {
 
-            using (SqlConnection conn = new SqlConnection(ConnStr))
+            using (SqlConnection conn = new SqlConnection(ConnectionString))
             {
                 conn.Open();
                 using (SqlCommand cmd = conn.CreateCommand())

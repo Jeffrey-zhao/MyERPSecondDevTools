@@ -95,6 +95,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Common\AppDataHelper.cs" />
     <Compile Include="Common\FiddlerHelper.cs" />
     <Compile Include="Common\FolderHelper.cs" />
     <Compile Include="Common\GlobalData.cs" />
@@ -120,7 +121,7 @@
       <DependentUpon>Resources.resx</DependentUpon>
       <DesignTime>True</DesignTime>
     </Compile>
-    <None Include="AppData\erpPathHistory.json" />
+    <None Include="AppData\appData.json" />
     <None Include="packages.config" />
     <None Include="Properties\Settings.settings">
       <Generator>SettingsSingleFileGenerator</Generator>
