@@ -19,10 +19,22 @@ namespace MyERPSecondDevTools
 {
     public partial class MyERPSecondDevTools : Form
     {
+        #region 局部变量
         /// <summary>
         /// 浏览器控件
         /// </summary>
-        private WebBrowser webBrowser = new WebBrowser();
+        private WebBrowser jsTreeWebBrowser = null;
+        /// <summary>
+        /// 明源ERP响应HTML
+        /// </summary>
+        private string MyERPResponseHtml { get; set; }
+
+        /// <summary>
+        /// JS语法树响应HTML
+        /// </summary>
+        private string JsTreeSyntaxResponseHtml { get; set; }
+        #endregion
+
 
         #region 窗体初始化
         public MyERPSecondDevTools()
@@ -169,36 +181,42 @@ namespace MyERPSecondDevTools
                 MessageBox.Show("请输入二开的页面地址");
                 return;
             }
-            
+
             var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
             webBrowser.Navigate(url);
             webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
         }
 
         /// <summary>
-        /// 元素加载完成事件
+        /// ERP站点加载完成事件
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            if (!webBrowser.Url.AbsoluteUri.Contains("?applicationId="))
+            //ERP站点
+            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
             {
-                //ERP站点
-                while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
-                {
-                    Application.DoEvents();
-                }
-                //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
-                timer_GetResponse.Start();
+                Application.DoEvents();
             }
-            else
-            {
-                //JS语法解析站点
-                richTextBox1.Text = webBrowser.Document.All[1].OuterHtml;
-                //获取JS语法树数据
-                GetJsSyntaxTree(richTextBox1.Text);
-            }
+            //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
+            timer_GetResponse.Start();
+        }
+
+        /// <summary>
+        /// JS解析站点加载完成事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void webBrowser2_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
+        {
+
+            //JS语法解析站点
+            JsTreeSyntaxResponseHtml = webBrowser.Document.All[1].OuterHtml;
+            //获取JS语法树数据
+            GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
+            //释放资源
+            jsTreeWebBrowser.Dispose();
         }
 
         /// <summary>
@@ -208,10 +226,10 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void timer_GetResponse_Tick(object sender, EventArgs e)
         {
-            richTextBox1.Text = webBrowser.Document.All[1].OuterHtml;
+            MyERPResponseHtml = webBrowser.Document.All[1].OuterHtml;
             //只执行一次
             timer_GetResponse.Stop();
-            HtmlAgilityPack(richTextBox1.Text);
+            HtmlAgilityPack(MyERPResponseHtml);
         }
 
         #endregion
@@ -253,9 +271,11 @@ namespace MyERPSecondDevTools
                     businessScripts.Add(item.Attributes["src"].Value);
                 }
             }
-            FiddlerHelper.GetERPBusinessJsModels(businessScripts);
+            var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
             //跳转到JS解析站点
-            webBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
+            jsTreeWebBrowser = new WebBrowser();
+            jsTreeWebBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
+            jsTreeWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser2_DocumentCompleted);
         }
 
         /// <summary>

@@ -31,16 +31,23 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MyERPSecondDevTools));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
-            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
-            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolErpPathLabel = new System.Windows.Forms.ToolStripLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
             this.timer_GetResponse = new System.Windows.Forms.Timer(this.components);
+            this.tabControl = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.webBrowser = new System.Windows.Forms.WebBrowser();
+            this.treeView1 = new System.Windows.Forms.TreeView();
+            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
+            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
+            this.tabControl.SuspendLayout();
+            this.tabPage1.SuspendLayout();
+            this.tabPage2.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -51,9 +58,103 @@
             this.toolErpPathLabel});
             this.toolStrip1.Location = new System.Drawing.Point(0, 0);
             this.toolStrip1.Name = "toolStrip1";
-            this.toolStrip1.Size = new System.Drawing.Size(1244, 25);
+            this.toolStrip1.Size = new System.Drawing.Size(1584, 25);
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
+            // 
+            // toolErpPathLabel
+            // 
+            this.toolErpPathLabel.Name = "toolErpPathLabel";
+            this.toolErpPathLabel.Size = new System.Drawing.Size(0, 22);
+            // 
+            // groupBox1
+            // 
+            this.groupBox1.Controls.Add(this.tabControl);
+            this.groupBox1.Controls.Add(this.button_fiddler);
+            this.groupBox1.Controls.Add(this.txt_pageUrl);
+            this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.groupBox1.Location = new System.Drawing.Point(0, 25);
+            this.groupBox1.Name = "groupBox1";
+            this.groupBox1.Size = new System.Drawing.Size(1584, 836);
+            this.groupBox1.TabIndex = 1;
+            this.groupBox1.TabStop = false;
+            // 
+            // button_fiddler
+            // 
+            this.button_fiddler.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
+            this.button_fiddler.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
+            this.button_fiddler.Location = new System.Drawing.Point(1221, 12);
+            this.button_fiddler.Name = "button_fiddler";
+            this.button_fiddler.Size = new System.Drawing.Size(75, 23);
+            this.button_fiddler.TabIndex = 0;
+            this.button_fiddler.Text = "Go";
+            this.button_fiddler.UseVisualStyleBackColor = true;
+            this.button_fiddler.Click += new System.EventHandler(this.button_fiddler_Click);
+            // 
+            // txt_pageUrl
+            // 
+            this.txt_pageUrl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.txt_pageUrl.Location = new System.Drawing.Point(7, 13);
+            this.txt_pageUrl.Name = "txt_pageUrl";
+            this.txt_pageUrl.Size = new System.Drawing.Size(1200, 21);
+            this.txt_pageUrl.TabIndex = 1;
+            // 
+            // timer_GetResponse
+            // 
+            this.timer_GetResponse.Interval = 50;
+            this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
+            // 
+            // tabControl
+            // 
+            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl.Controls.Add(this.tabPage1);
+            this.tabControl.Controls.Add(this.tabPage2);
+            this.tabControl.Location = new System.Drawing.Point(3, 40);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(1578, 946);
+            this.tabControl.TabIndex = 4;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.webBrowser);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1570, 920);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "ERP界面预览";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.treeView1);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1570, 920);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "CodeHelper";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser
+            // 
+            this.webBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser.Name = "webBrowser";
+            this.webBrowser.Size = new System.Drawing.Size(1564, 914);
+            this.webBrowser.TabIndex = 0;
+            // 
+            // treeView1
+            // 
+            this.treeView1.Dock = System.Windows.Forms.DockStyle.Left;
+            this.treeView1.Location = new System.Drawing.Point(3, 3);
+            this.treeView1.Name = "treeView1";
+            this.treeView1.Size = new System.Drawing.Size(323, 914);
+            this.treeView1.TabIndex = 0;
             // 
             // tool_ButtonSetERPPath
             // 
@@ -72,68 +173,26 @@
             this.toolStripHistory.Size = new System.Drawing.Size(85, 22);
             this.toolStripHistory.Text = "选择历史";
             // 
-            // toolErpPathLabel
-            // 
-            this.toolErpPathLabel.Name = "toolErpPathLabel";
-            this.toolErpPathLabel.Size = new System.Drawing.Size(0, 22);
-            // 
-            // groupBox1
-            // 
-            this.groupBox1.Controls.Add(this.richTextBox1);
-            this.groupBox1.Controls.Add(this.button_fiddler);
-            this.groupBox1.Controls.Add(this.txt_pageUrl);
-            this.groupBox1.Location = new System.Drawing.Point(0, 24);
-            this.groupBox1.Name = "groupBox1";
-            this.groupBox1.Size = new System.Drawing.Size(1244, 688);
-            this.groupBox1.TabIndex = 1;
-            this.groupBox1.TabStop = false;
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Location = new System.Drawing.Point(5, 39);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.Size = new System.Drawing.Size(1233, 642);
-            this.richTextBox1.TabIndex = 3;
-            this.richTextBox1.Text = "";
-            // 
-            // button_fiddler
-            // 
-            this.button_fiddler.Location = new System.Drawing.Point(1008, 12);
-            this.button_fiddler.Name = "button_fiddler";
-            this.button_fiddler.Size = new System.Drawing.Size(75, 23);
-            this.button_fiddler.TabIndex = 0;
-            this.button_fiddler.Text = "Fiddler";
-            this.button_fiddler.UseVisualStyleBackColor = true;
-            this.button_fiddler.Click += new System.EventHandler(this.button_fiddler_Click);
-            // 
-            // txt_pageUrl
-            // 
-            this.txt_pageUrl.Location = new System.Drawing.Point(7, 13);
-            this.txt_pageUrl.Name = "txt_pageUrl";
-            this.txt_pageUrl.Size = new System.Drawing.Size(992, 21);
-            this.txt_pageUrl.TabIndex = 1;
-            // 
-            // timer_GetResponse
-            // 
-            this.timer_GetResponse.Interval = 50;
-            this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
-            // 
             // MyERPSecondDevTools
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(1244, 724);
+            this.ClientSize = new System.Drawing.Size(1584, 861);
             this.Controls.Add(this.groupBox1);
             this.Controls.Add(this.toolStrip1);
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MyERPSecondDevTools";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
             this.Text = "明源ERP二开工具箱 - V1.0.0";
+            this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.Load += new System.EventHandler(this.MyERPSecondDevTools_Load);
             this.toolStrip1.ResumeLayout(false);
             this.toolStrip1.PerformLayout();
             this.groupBox1.ResumeLayout(false);
             this.groupBox1.PerformLayout();
+            this.tabControl.ResumeLayout(false);
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage2.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -147,8 +206,12 @@
         private System.Windows.Forms.ToolStripDropDownButton toolStripHistory;
         private System.Windows.Forms.Button button_fiddler;
         private System.Windows.Forms.TextBox txt_pageUrl;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.Timer timer_GetResponse;
+        private System.Windows.Forms.TabControl tabControl;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.TabPage tabPage2;
+        private System.Windows.Forms.WebBrowser webBrowser;
+        private System.Windows.Forms.TreeView treeView1;
     }
 }
 
