@@ -34,5 +34,15 @@ namespace MyERPSecondDevTools.Common
         /// 工具库连接字符串
         /// </summary>
         public static string ToolsDataBaseConnectionString { get { return ConfigurationManager.AppSettings["ToolsDataBase"]; } }
+
+        /// <summary>
+        /// 全局应用ID
+        /// </summary>
+        public static Guid ApplicationId { get { return Guid.NewGuid(); } }
+
+        /// <summary>
+        /// JS解析站点的地址
+        /// </summary>
+        public static string ToolsJsSyntaxAnalysisWebSite { get { return ConfigurationManager.AppSettings["ToolsJsSyntaxAnalysisWebSite"]; } }
     }
 }

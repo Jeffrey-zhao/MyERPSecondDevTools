@@ -12,6 +12,11 @@ namespace MyERPSecondDevTools.Model.Model
     public class MyERPBusinessJsModel
     {
         /// <summary>
+        /// 应用ID
+        /// </summary>
+        public Guid ApplicationId { get; set; }
+
+        /// <summary>
         /// JS名称
         /// </summary>
         public string JsName { get; set; }

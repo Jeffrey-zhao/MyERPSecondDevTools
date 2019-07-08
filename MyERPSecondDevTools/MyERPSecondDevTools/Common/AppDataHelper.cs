@@ -71,6 +71,5 @@ namespace MyERPSecondDevTools.Common
                 return null;
             }
         }
-
     }
 }

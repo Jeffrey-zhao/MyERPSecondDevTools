@@ -147,7 +147,7 @@ namespace MyERPSecondDevTools
 
         #endregion
 
-        #region 获取异步请求结束后的页面全部响应内容
+        #region 获取异步请求结束后的页面全部响应内容并解析
         /// <summary>
         /// Fiddler点击事件
         /// </summary>
@@ -167,12 +167,19 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+            if (!webBrowser.Url.AbsoluteUri.Contains("?applicationId="))
             {
-                Application.DoEvents();
+                while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+                {
+                    Application.DoEvents();
+                }
+                //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
+                timer_GetResponse.Start();
             }
-            //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
-            timer_GetResponse.Start();
+            else
+            {
+                richTextBox1.Text = webBrowser.Document.Body.OuterHtml;
+            }
         }
 
         /// <summary>
@@ -224,6 +231,8 @@ namespace MyERPSecondDevTools
                 }
             }
             FiddlerHelper.GetERPBusinessJsModels(businessScripts);
+            //跳转到JS解析站点
+            webBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
         }
         #endregion
     }

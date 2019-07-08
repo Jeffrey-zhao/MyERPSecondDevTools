@@ -1,6 +1,7 @@
 ﻿using MyERPSecondDevTools.Model.Model;
 using System;
 using System.Collections.Generic;
+using System.Data.SqlClient;
 using System.IO;
 using System.Linq;
 using System.Net;
@@ -36,6 +37,9 @@ namespace MyERPSecondDevTools.Common
         /// <returns></returns>
         public static List<MyERPBusinessJsModel> GetERPBusinessJsModels(List<string> jsPathList)
         {
+            //应用ID
+            var applicationId = GlobalData.ApplicationId;
+
             var totalCount = jsPathList.Count;
             //获取JS源码任务四等分，除不尽五等分，并行执行
             var factorNum = totalCount / 4;
@@ -51,6 +55,7 @@ namespace MyERPSecondDevTools.Common
                     var downLoadString = Encoding.UTF8.GetString(webClient.DownloadData(m));
                     models.Add(new MyERPBusinessJsModel
                     {
+                        ApplicationId = applicationId,
                         JsName = m,
                         JsContent = downLoadString
                     });
@@ -61,35 +66,34 @@ namespace MyERPSecondDevTools.Common
 
             List<Task<List<MyERPBusinessJsModel>>> tasks = new List<Task<List<MyERPBusinessJsModel>>>();
 
+            var currentList1 = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
             tasks.Add(Task.Factory.StartNew(() =>
             {
-                var currentList = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
-                var models = downLoadBody(currentList);
+                var models = downLoadBody(currentList1);
                 return models;
             }));
             currentNum++;
 
+            var currentList2 = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
             tasks.Add(Task.Factory.StartNew(() =>
             {
-                var currentList = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
-                var models = downLoadBody(currentList);
+                var models = downLoadBody(currentList2);
                 return models;
             }));
             currentNum++;
 
+            var currentList3 = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
             tasks.Add(Task.Factory.StartNew(() =>
             {
-                var currentList = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
-                var models = downLoadBody(currentList);
+                var models = downLoadBody(currentList3);
                 return models;
             }));
             currentNum++;
 
+            var currentList4 = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
             tasks.Add(Task.Factory.StartNew(() =>
             {
-                var currentList = jsPathList.Skip(currentNum * factorNum).Take(factorNum);
-                var models = downLoadBody(currentList);
-
+                var models = downLoadBody(currentList4);
                 return models;
             }));
             currentNum++;
@@ -97,21 +101,50 @@ namespace MyERPSecondDevTools.Common
             var remainder = totalCount % 4;
             if (remainder > 0)
             {
+                var currentList5 = jsPathList.Skip(currentNum * factorNum).Take(remainder);
                 tasks.Add(Task.Factory.StartNew(() =>
                 {
-                    var currentList = jsPathList.Skip(currentNum * factorNum).Take(remainder);
-                    var models = downLoadBody(currentList);
+                    var models = downLoadBody(currentList5);
                     return models;
                 }));
             }
-            
+
             var taskResult = Task.WhenAll(tasks);
-            var result =taskResult.Result.Aggregate(Enumerable.Empty<MyERPBusinessJsModel>(), (total, next) =>
-            {
-                return total.Union(next);
-            }).ToList();
+            var result = taskResult.Result.Aggregate(Enumerable.Empty<MyERPBusinessJsModel>(), (total, next) =>
+             {
+                 return total.Union(next);
+             }).ToList();
+
+            //业务js写入到数据库中
+            WriteToToolDB(result, applicationId);
 
             return result;
+        }
+
+        /// <summary>
+        /// JS源码写入到工具库中
+        /// </summary>
+        private static void WriteToToolDB(List<MyERPBusinessJsModel> jsModels, Guid applicationId)
+        {
+            SqlHelper sqlHelper = new SqlHelper(GlobalData.ToolsDataBaseConnectionString);
+            //清空原有数据
+            sqlHelper.ExecuteNonQuery($"DELETE FROM [MyERPDevToolsScripts] WHERE ApplicationId = '{applicationId}'");
+            var insertSb = new StringBuilder();
+            jsModels.ForEach(m =>
+            {
+                var strSql = @"  INSERT INTO dbo.MyERPDevToolsScripts
+                                                  ( ApplicationId, JsName, JsData )
+                                          VALUES  ( @applicationId,
+                                                    @jsName,
+                                                    @jsContent
+                                                    );";
+                sqlHelper.ExecuteNonQuery(strSql, new SqlParameter[]
+                {
+                    new SqlParameter("applicationId", applicationId),
+                    new SqlParameter("jsName", m.JsName),
+                    new SqlParameter("jsContent", m.JsContent),
+                });
+            });
         }
     }
 }
