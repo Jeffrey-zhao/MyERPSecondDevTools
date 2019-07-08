@@ -29,7 +29,6 @@ namespace MyERPSecondDevTools
         {
             InitializeComponent();
             CheckForIllegalCrossThreadCalls = false;
-            this.richTextBox1.Text = GlobalData.ApplicationId.ToString();
         }
 
         /// <summary>
@@ -109,9 +108,11 @@ namespace MyERPSecondDevTools
                 toolErpPathLabel.Text = sender.ToString();
                 FolderHelper.InitERPData(sender.ToString());
             }
+            else
+                MessageBox.Show("您选择目录不是ERP站点目录，请重新选择");
         }
 
-        
+
         /// <summary>
         /// 加载页面地址框PlaceHolder
         /// </summary>
@@ -157,6 +158,18 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void button_fiddler_Click(object sender, EventArgs e)
         {
+            if (toolErpPathLabel.Text == "")
+            {
+                MessageBox.Show("请设置ERP站点路径");
+                return;
+            }
+
+            if (txt_pageUrl.Text == "" || txt_pageUrl.Text == "请输入二开的页面地址")
+            {
+                MessageBox.Show("请输入二开的页面地址");
+                return;
+            }
+            
             var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
             webBrowser.Navigate(url);
             webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
