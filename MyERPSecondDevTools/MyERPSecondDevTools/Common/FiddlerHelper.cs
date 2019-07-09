@@ -1,4 +1,6 @@
 ﻿using MyERPSecondDevTools.Model.Model;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Data.SqlClient;
@@ -25,6 +27,8 @@ namespace MyERPSecondDevTools.Common
                 pageUrl = "http://" + pageUrl;
             if (!host.ToLower().Contains("http://"))
                 host = "http://" + host;
+            GlobalData.ERPHost = host;
+
             //OA集成登录地址
             var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?UserCode={GlobalData.ERPUserCode}&PageUrl={System.Web.HttpUtility.UrlEncode(pageUrl)}";
             return formatRequestUrl;
@@ -146,6 +150,106 @@ namespace MyERPSecondDevTools.Common
                     new SqlParameter("jsContent", m.JsContent),
                 });
             });
+        }
+
+        /// <summary>
+        /// 获取可扩展控件
+        /// </summary>
+        /// <param name="metaDataId"></param>
+        public static List<ModulePluginPointModel> GetControlMetaData(List<DesignModel> designModels)
+        {
+            var modulePluginPointModels = new List<ModulePluginPointModel>();
+
+            Func<string, string> GetTitleByName = name =>
+            {
+                if (name.Contains("_appForm_load"))
+                    return "页面加载事件";
+                else if (name.Contains("_Grid_load"))
+                    return "网格加载事件";
+                else if (name.Contains("_Grid_query"))
+                    return "网格查询事件";
+                else
+                    return name;
+            };
+
+            Func<string, string, string> GetToolBarTitleByName = (type, align) =>
+            {
+                if (type == "global")
+                    return "页面按钮";
+                else if (type == "row" && align == "left")
+                    return "行左侧按钮";
+                else if (type == "row" && align == "center")
+                    return "行中间按钮";
+                else if (type == "row" && align == "right")
+                    return "行右侧按钮";
+                else
+                    return "按钮";
+            };
+            
+            designModels.ForEach(m =>
+            {
+                ModulePluginPointModel modulePluginPointModel = new ModulePluginPointModel();
+                modulePluginPointModel.Title = m.DataLabel;
+                var pluginPointModels = new List<PluginPointModel>();
+                var postData = new
+                {
+                    design = true,
+                    controlName = m.DataType,
+                    metadataId = m.DataId
+                };
+                var jsonPostData = JsonConvert.SerializeObject(postData);
+                var responseData = ERPWebRequestHelper.PostWebRequest(GlobalData.ERPHost + "/ajax/Mysoft.Map6.Modeling.Handlers.Metadatas.MetadataAjaxHandler/GetControlMetadata.aspx", jsonPostData, Encoding.UTF8);
+                JObject jsonObject = (JObject)JToken.Parse(responseData);
+                var events = jsonObject["item"]["layout"]["events"];
+                foreach (var item in events)
+                {
+                    pluginPointModels.Add(new PluginPointModel
+                    {
+                        Type = m.DataType,
+                        ControlId = item["functionName"].ToString(),
+                        Title = GetTitleByName(item["functionName"].ToString()),
+                        Events = new List<PluginPointModelEvent>
+                        {
+                            new PluginPointModelEvent
+                            {
+                                 EventName= item["name"].ToString(),
+                                 FunctionName= item["functionName"].ToString(),
+                            }
+                        }
+                    });
+                }
+
+                var toolBars = jsonObject["item"]["layout"]["toolbars"];
+                foreach (var item in toolBars)
+                {
+                    foreach (var subItem in item["groups"])
+                    {
+                        foreach (var secItem in subItem["items"])
+                        {
+                            var model = new PluginPointModel
+                            {
+                                Type = "按钮",
+                                ControlId = secItem["id"].ToString(),
+                                Title = GetToolBarTitleByName(item["type"].ToString(), subItem["align"].ToString()) + "-" + secItem["title"].ToString(),
+                                Events = new List<PluginPointModelEvent>()
+                            };
+                            foreach (var fourItem in secItem["events"])
+                            {
+                                model.Events.Add(new PluginPointModelEvent
+                                {
+                                    EventName = fourItem["name"].ToString(),
+                                    FunctionName = fourItem["functionName"].ToString(),
+                                });
+                            }
+                            pluginPointModels.Add(model);
+                        }
+                    }
+                }
+                modulePluginPointModel.PluginPointModels = pluginPointModels;
+                modulePluginPointModels.Add(modulePluginPointModel);
+            });
+
+            return modulePluginPointModels;
         }
     }
 }

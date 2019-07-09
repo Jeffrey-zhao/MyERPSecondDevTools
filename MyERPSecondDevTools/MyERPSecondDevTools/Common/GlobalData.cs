@@ -54,5 +54,10 @@ namespace MyERPSecondDevTools.Common
         /// ERP AppKey
         /// </summary>
         public static string ERPPubAppKey { get; set; }
+
+        /// <summary>
+        /// ERP站点主机名
+        /// </summary>
+        public static string ERPHost { get; set; }
     }
 }

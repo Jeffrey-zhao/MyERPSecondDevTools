@@ -42,8 +42,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Model\AppDataModel.cs" />
+    <Compile Include="Model\DesignModel.cs" />
+    <Compile Include="Model\ControlMetadataModel.cs" />
+    <Compile Include="Model\ModulePluginPointModel.cs" />
     <Compile Include="Model\MyERPBusinessJsModel.cs" />
     <Compile Include="Model\MyERPBusinessJsSyntaxTreeModel.cs" />
+    <Compile Include="Model\PluginPointModel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup />

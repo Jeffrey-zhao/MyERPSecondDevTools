@@ -212,9 +212,11 @@ namespace MyERPSecondDevTools
         {
 
             //JS语法解析站点
-            JsTreeSyntaxResponseHtml = webBrowser.Document.All[1].OuterHtml;
+            JsTreeSyntaxResponseHtml = jsTreeWebBrowser.Document.All[1].OuterHtml;
             //获取JS语法树数据
             GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
+            //加载树
+            InitTreeData();
             //释放资源
             jsTreeWebBrowser.Dispose();
         }
@@ -282,7 +284,7 @@ namespace MyERPSecondDevTools
         /// 获取JS语法树数据
         /// </summary>
         /// <param name="responseHtml">解析站点响应的HTML</param>
-        public void GetJsSyntaxTree(string responseHtml)
+        private void GetJsSyntaxTree(string responseHtml)
         {
             List<MyERPBusinessJsSyntaxTreeModel> jsSyntaxTreeModels = new List<MyERPBusinessJsSyntaxTreeModel>();
             var doc = new HtmlAgilityPack.HtmlDocument();
@@ -296,6 +298,69 @@ namespace MyERPSecondDevTools
                     JsSyntaxTreeJson = item.InnerHtml
                 });
             }
+        }
+
+        /// <summary>
+        /// 初始化加载树
+        /// </summary>
+        private void InitTreeData()
+        {
+            tv_code.Nodes.Clear();
+            Func<string, string> convertDataLabel = label =>
+            {
+                return label.
+                Replace("控件", string.Empty).
+                Replace("页面", string.Empty).
+                Replace("网格", "列表").
+                Replace("表单", "信息");
+            };
+
+            var appFormDesignList = new List<DesignModel>();
+            var doc = new HtmlAgilityPack.HtmlDocument();
+            doc.LoadHtml(MyERPResponseHtml);
+            var divDesignerList = doc.DocumentNode.SelectNodes("//div[contains(@class,'nav-designer-sub-menu-item')]");
+            foreach (var item in divDesignerList)
+            {
+                if (item.Attributes["data-type"].Value != "page")
+                {
+                    appFormDesignList.Add(new DesignModel
+                    {
+                        DataId = item.Attributes["data-id"].Value,
+                        DataName = item.Attributes["data-name"].Value,
+                        DataLabel = convertDataLabel(item.Attributes["data-label"].Value),
+                        DataType = item.Attributes["data-type"].Value,
+                        DataItemType = item.Attributes["data-item-type"].Value,
+                    });
+                }
+            }
+            var treeData = FiddlerHelper.GetControlMetaData(appFormDesignList);
+            foreach (var item in treeData)
+            {
+                TreeNode tn = new TreeNode();
+                tn.Text = item.Title;
+                foreach (var subItem in item.PluginPointModels)
+                {
+                    TreeNode subTn = new TreeNode
+                    {
+                        Text = subItem.Title,
+                        Tag = subItem.ControlId
+                    };
+
+                    foreach (var secItem in subItem.Events)
+                    {
+                        TreeNode secTn = new TreeNode
+                        {
+                            Text = secItem.FunctionName,
+                            Tag = secItem.FunctionName
+                        };
+                        subTn.Nodes.Add(secTn);
+                    }
+
+                    tn.Nodes.Add(subTn);
+                }
+                tv_code.Nodes.Add(tn);
+            }
+            tabControl.SelectedTab = tabPage2;
         }
         #endregion
     }

@@ -31,18 +31,18 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MyERPSecondDevTools));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
+            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolErpPathLabel = new System.Windows.Forms.ToolStripLabel();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
+            this.tabControl = new System.Windows.Forms.TabControl();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.webBrowser = new System.Windows.Forms.WebBrowser();
+            this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.tv_code = new System.Windows.Forms.TreeView();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
             this.timer_GetResponse = new System.Windows.Forms.Timer(this.components);
-            this.tabControl = new System.Windows.Forms.TabControl();
-            this.tabPage1 = new System.Windows.Forms.TabPage();
-            this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.webBrowser = new System.Windows.Forms.WebBrowser();
-            this.treeView1 = new System.Windows.Forms.TreeView();
-            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
-            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -62,6 +62,23 @@
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // tool_ButtonSetERPPath
+            // 
+            this.tool_ButtonSetERPPath.Image = global::MyERPSecondDevTools.Properties.Resources.数据目录;
+            this.tool_ButtonSetERPPath.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tool_ButtonSetERPPath.Name = "tool_ButtonSetERPPath";
+            this.tool_ButtonSetERPPath.Size = new System.Drawing.Size(98, 22);
+            this.tool_ButtonSetERPPath.Text = "设置ERP路径";
+            this.tool_ButtonSetERPPath.Click += new System.EventHandler(this.toolSetERPPath_Click);
+            // 
+            // toolStripHistory
+            // 
+            this.toolStripHistory.Image = global::MyERPSecondDevTools.Properties.Resources.历史记录;
+            this.toolStripHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripHistory.Name = "toolStripHistory";
+            this.toolStripHistory.Size = new System.Drawing.Size(85, 22);
+            this.toolStripHistory.Text = "选择历史";
+            // 
             // toolErpPathLabel
             // 
             this.toolErpPathLabel.Name = "toolErpPathLabel";
@@ -78,6 +95,57 @@
             this.groupBox1.Size = new System.Drawing.Size(1584, 836);
             this.groupBox1.TabIndex = 1;
             this.groupBox1.TabStop = false;
+            // 
+            // tabControl
+            // 
+            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
+            | System.Windows.Forms.AnchorStyles.Right)));
+            this.tabControl.Controls.Add(this.tabPage1);
+            this.tabControl.Controls.Add(this.tabPage2);
+            this.tabControl.Location = new System.Drawing.Point(3, 40);
+            this.tabControl.Name = "tabControl";
+            this.tabControl.SelectedIndex = 0;
+            this.tabControl.Size = new System.Drawing.Size(1578, 946);
+            this.tabControl.TabIndex = 4;
+            // 
+            // tabPage1
+            // 
+            this.tabPage1.Controls.Add(this.webBrowser);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1570, 920);
+            this.tabPage1.TabIndex = 0;
+            this.tabPage1.Text = "界面预览";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // webBrowser
+            // 
+            this.webBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.webBrowser.Location = new System.Drawing.Point(3, 3);
+            this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
+            this.webBrowser.Name = "webBrowser";
+            this.webBrowser.Size = new System.Drawing.Size(1564, 914);
+            this.webBrowser.TabIndex = 0;
+            // 
+            // tabPage2
+            // 
+            this.tabPage2.Controls.Add(this.tv_code);
+            this.tabPage2.Location = new System.Drawing.Point(4, 22);
+            this.tabPage2.Name = "tabPage2";
+            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage2.Size = new System.Drawing.Size(1570, 920);
+            this.tabPage2.TabIndex = 1;
+            this.tabPage2.Text = "代码预览";
+            this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // tv_code
+            // 
+            this.tv_code.Dock = System.Windows.Forms.DockStyle.Left;
+            this.tv_code.Location = new System.Drawing.Point(3, 3);
+            this.tv_code.Name = "tv_code";
+            this.tv_code.Size = new System.Drawing.Size(466, 914);
+            this.tv_code.TabIndex = 0;
             // 
             // button_fiddler
             // 
@@ -104,74 +172,6 @@
             // 
             this.timer_GetResponse.Interval = 50;
             this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
-            // 
-            // tabControl
-            // 
-            this.tabControl.Anchor = ((System.Windows.Forms.AnchorStyles)(((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.tabControl.Controls.Add(this.tabPage1);
-            this.tabControl.Controls.Add(this.tabPage2);
-            this.tabControl.Location = new System.Drawing.Point(3, 40);
-            this.tabControl.Name = "tabControl";
-            this.tabControl.SelectedIndex = 0;
-            this.tabControl.Size = new System.Drawing.Size(1578, 946);
-            this.tabControl.TabIndex = 4;
-            // 
-            // tabPage1
-            // 
-            this.tabPage1.Controls.Add(this.webBrowser);
-            this.tabPage1.Location = new System.Drawing.Point(4, 22);
-            this.tabPage1.Name = "tabPage1";
-            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage1.Size = new System.Drawing.Size(1570, 920);
-            this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "ERP界面预览";
-            this.tabPage1.UseVisualStyleBackColor = true;
-            // 
-            // tabPage2
-            // 
-            this.tabPage2.Controls.Add(this.treeView1);
-            this.tabPage2.Location = new System.Drawing.Point(4, 22);
-            this.tabPage2.Name = "tabPage2";
-            this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
-            this.tabPage2.Size = new System.Drawing.Size(1570, 920);
-            this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "CodeHelper";
-            this.tabPage2.UseVisualStyleBackColor = true;
-            // 
-            // webBrowser
-            // 
-            this.webBrowser.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.webBrowser.Location = new System.Drawing.Point(3, 3);
-            this.webBrowser.MinimumSize = new System.Drawing.Size(20, 20);
-            this.webBrowser.Name = "webBrowser";
-            this.webBrowser.Size = new System.Drawing.Size(1564, 914);
-            this.webBrowser.TabIndex = 0;
-            // 
-            // treeView1
-            // 
-            this.treeView1.Dock = System.Windows.Forms.DockStyle.Left;
-            this.treeView1.Location = new System.Drawing.Point(3, 3);
-            this.treeView1.Name = "treeView1";
-            this.treeView1.Size = new System.Drawing.Size(323, 914);
-            this.treeView1.TabIndex = 0;
-            // 
-            // tool_ButtonSetERPPath
-            // 
-            this.tool_ButtonSetERPPath.Image = global::MyERPSecondDevTools.Properties.Resources.数据目录;
-            this.tool_ButtonSetERPPath.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tool_ButtonSetERPPath.Name = "tool_ButtonSetERPPath";
-            this.tool_ButtonSetERPPath.Size = new System.Drawing.Size(98, 22);
-            this.tool_ButtonSetERPPath.Text = "设置ERP路径";
-            this.tool_ButtonSetERPPath.Click += new System.EventHandler(this.toolSetERPPath_Click);
-            // 
-            // toolStripHistory
-            // 
-            this.toolStripHistory.Image = global::MyERPSecondDevTools.Properties.Resources.历史记录;
-            this.toolStripHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripHistory.Name = "toolStripHistory";
-            this.toolStripHistory.Size = new System.Drawing.Size(85, 22);
-            this.toolStripHistory.Text = "选择历史";
             // 
             // MyERPSecondDevTools
             // 
@@ -211,7 +211,7 @@
         private System.Windows.Forms.TabPage tabPage1;
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.WebBrowser webBrowser;
-        private System.Windows.Forms.TreeView treeView1;
+        private System.Windows.Forms.TreeView tv_code;
     }
 }
 

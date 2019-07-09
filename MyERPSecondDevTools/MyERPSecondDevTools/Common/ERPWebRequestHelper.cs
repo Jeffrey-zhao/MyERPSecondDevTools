@@ -16,7 +16,7 @@ namespace MyERPSecondDevTools.Common
         /// <param name="getUrl">接口地址</param>
         /// /// <param name="contentType">ContentType</param>
         /// <returns></returns>
-        private static string GetWebRequest(string getUrl, string contentType = null)
+        public static string GetWebRequest(string getUrl, string contentType = null)
         {
             string responseContent = "";
 
@@ -46,7 +46,7 @@ namespace MyERPSecondDevTools.Common
         /// <param name="dataEncode">编码方式(Encoding.UTF8)</param>
         /// <param name="contentType">ContentType</param>
         /// <returns></returns>
-        private static string PostWebRequest(string postUrl, string paramData, Encoding dataEncode, string contentType = "application/json")
+        public static string PostWebRequest(string postUrl, string paramData, Encoding dataEncode, string contentType = "application/json")
         {
             string responseContent = string.Empty;
             try
@@ -68,7 +68,7 @@ namespace MyERPSecondDevTools.Common
                 using (HttpWebResponse response = (HttpWebResponse)webReq.GetResponse())
                 {
                     //在这里对接收到的页面内容进行处理
-                    using (StreamReader sr = new StreamReader(response.GetResponseStream(), Encoding.Default))
+                    using (StreamReader sr = new StreamReader(response.GetResponseStream(), dataEncode))
                     {
                         responseContent = sr.ReadToEnd().ToString();
                     }
