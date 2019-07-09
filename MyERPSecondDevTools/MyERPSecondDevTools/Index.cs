@@ -33,6 +33,21 @@ namespace MyERPSecondDevTools
         /// JS语法树响应HTML
         /// </summary>
         private string JsTreeSyntaxResponseHtml { get; set; }
+
+        /// <summary>
+        /// JS源码数据
+        /// </summary>
+        private List<MyERPBusinessJsModel> JsSourceCodeData { get; set; }
+
+        /// <summary>
+        /// JS语法树数据
+        /// </summary>
+        private List<MyERPBusinessJsSyntaxTreeModel> MyERPBusinessJsSyntaxTreeModels { get; set; }
+
+        /// <summary>
+        /// JS源码语法树聚合数据
+        /// </summary>
+        private List<MyERPBusJsAndTreeModel> MyERPBusJsAndTreeModels { get; set; }
         #endregion
 
 
@@ -273,7 +288,9 @@ namespace MyERPSecondDevTools
                     businessScripts.Add(item.Attributes["src"].Value);
                 }
             }
+            //业务JS源码数据
             var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
+            JsSourceCodeData = jsContentModels;
             //跳转到JS解析站点
             jsTreeWebBrowser = new WebBrowser();
             jsTreeWebBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
@@ -286,18 +303,58 @@ namespace MyERPSecondDevTools
         /// <param name="responseHtml">解析站点响应的HTML</param>
         private void GetJsSyntaxTree(string responseHtml)
         {
-            List<MyERPBusinessJsSyntaxTreeModel> jsSyntaxTreeModels = new List<MyERPBusinessJsSyntaxTreeModel>();
+            MyERPBusinessJsSyntaxTreeModels = new List<MyERPBusinessJsSyntaxTreeModel>();
             var doc = new HtmlAgilityPack.HtmlDocument();
             doc.LoadHtml(responseHtml);
             var divList = doc.DocumentNode.SelectNodes("/html/body/div");
             foreach (var item in divList)
             {
-                jsSyntaxTreeModels.Add(new MyERPBusinessJsSyntaxTreeModel
+                MyERPBusinessJsSyntaxTreeModels.Add(new MyERPBusinessJsSyntaxTreeModel
                 {
                     JsName = item.Attributes["id"].Value,
                     JsSyntaxTreeJson = item.InnerHtml
                 });
             }
+
+            Func<string, string> GetModuleName = jsonData =>
+            {
+                JObject jsonObject = (JObject)JToken.Parse(jsonData);
+                var bodyType = jsonObject["body"][0]["type"];
+                if (bodyType.ToString() == "ExpressionStatement")
+                {
+                    var expression = jsonObject["body"][0]["expression"];
+                    if (expression["callee"]["name"].ToString() == "define")
+                    {
+                        var moduleName = expression["arguments"][0]["value"].ToString();
+                        return moduleName;
+                    }
+                }
+                return null;
+            };
+            //组合源码语法树聚合数据
+            MyERPBusJsAndTreeModels = new List<MyERPBusJsAndTreeModel>();
+            foreach (var item in JsSourceCodeData)
+            {
+                foreach (var item2 in MyERPBusinessJsSyntaxTreeModels)
+                {
+                    var jsName1 = item.JsName.Substring(0, item.JsName.IndexOf("?"));
+                    var jsName2 = item2.JsName.Substring(0, item2.JsName.IndexOf("?"));
+                    if (jsName1.Equals(jsName2))
+                    {
+                        var moduleName = GetModuleName(item2.JsSyntaxTreeJson);
+                        if (moduleName != null)
+                        {
+                            MyERPBusJsAndTreeModel model = new MyERPBusJsAndTreeModel();
+                            model.JsPath = jsName1;
+                            model.JsSourceCode = item.JsContent;
+                            model.JsSyntaxTree = item2.JsSyntaxTreeJson;
+                            model.JsModuleName = moduleName;
+                            MyERPBusJsAndTreeModels.Add(model);
+                        }
+                    }
+                }
+            }
+            var str = string.Empty;
         }
 
         /// <summary>
@@ -333,6 +390,7 @@ namespace MyERPSecondDevTools
                     });
                 }
             }
+            //获取树数据
             var treeData = FiddlerHelper.GetControlMetaData(appFormDesignList);
             foreach (var item in treeData)
             {
@@ -340,23 +398,26 @@ namespace MyERPSecondDevTools
                 tn.Text = item.Title;
                 foreach (var subItem in item.PluginPointModels)
                 {
-                    TreeNode subTn = new TreeNode
+                    if (subItem.Events != null && subItem.Events.Count > 0)
                     {
-                        Text = subItem.Title,
-                        Tag = subItem.ControlId
-                    };
-
-                    foreach (var secItem in subItem.Events)
-                    {
-                        TreeNode secTn = new TreeNode
+                        TreeNode subTn = new TreeNode
                         {
-                            Text = secItem.FunctionName,
-                            Tag = secItem.FunctionName
+                            Text = subItem.Title,
+                            Tag = subItem.ControlId
                         };
-                        subTn.Nodes.Add(secTn);
-                    }
 
-                    tn.Nodes.Add(subTn);
+                        foreach (var secItem in subItem.Events)
+                        {
+                            TreeNode secTn = new TreeNode
+                            {
+                                Text = secItem.FunctionName,
+                                Tag = secItem.FunctionName
+                            };
+                            subTn.Nodes.Add(secTn);
+                        }
+
+                        tn.Nodes.Add(subTn);
+                    }
                 }
                 tv_code.Nodes.Add(tn);
             }
