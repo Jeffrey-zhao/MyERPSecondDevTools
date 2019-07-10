@@ -11,7 +11,7 @@ namespace MyERPSecondDevTools.Common
     {
         #region 公共方法
         /// <summary>
-        /// Get数据接口
+        /// ERPGet数据接口
         /// </summary>
         /// <param name="getUrl">接口地址</param>
         /// /// <param name="contentType">ContentType</param>
@@ -39,7 +39,7 @@ namespace MyERPSecondDevTools.Common
             return responseContent;
         }
         /// <summary>
-        /// Post数据接口
+        /// ERPPost数据接口
         /// </summary>
         /// <param name="postUrl">接口地址</param>
         /// <param name="paramData">提交json数据</param>

@@ -39,11 +39,11 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tv_code = new System.Windows.Forms.TreeView();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
             this.timer_GetResponse = new System.Windows.Forms.Timer(this.components);
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -141,13 +141,27 @@
             this.tabPage2.Text = "代码预览";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
+            // richTextBox1
+            // 
+            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.richTextBox1.HideSelection = false;
+            this.richTextBox1.Location = new System.Drawing.Point(469, 3);
+            this.richTextBox1.Name = "richTextBox1";
+            this.richTextBox1.ReadOnly = true;
+            this.richTextBox1.Size = new System.Drawing.Size(1098, 914);
+            this.richTextBox1.TabIndex = 1;
+            this.richTextBox1.Text = "";
+            // 
             // tv_code
             // 
             this.tv_code.Dock = System.Windows.Forms.DockStyle.Left;
+            this.tv_code.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
             this.tv_code.Location = new System.Drawing.Point(3, 3);
             this.tv_code.Name = "tv_code";
             this.tv_code.Size = new System.Drawing.Size(466, 914);
             this.tv_code.TabIndex = 0;
+            this.tv_code.Click += new System.EventHandler(this.tv_code_Click);
+            this.tv_code.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tv_code_MouseDown);
             // 
             // button_fiddler
             // 
@@ -169,21 +183,12 @@
             this.txt_pageUrl.Name = "txt_pageUrl";
             this.txt_pageUrl.Size = new System.Drawing.Size(1200, 21);
             this.txt_pageUrl.TabIndex = 1;
+            this.txt_pageUrl.Text = resources.GetString("txt_pageUrl.Text");
             // 
             // timer_GetResponse
             // 
             this.timer_GetResponse.Interval = 50;
             this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
-            // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.richTextBox1.Location = new System.Drawing.Point(469, 3);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(1098, 914);
-            this.richTextBox1.TabIndex = 1;
-            this.richTextBox1.Text = "";
             // 
             // MyERPSecondDevTools
             // 

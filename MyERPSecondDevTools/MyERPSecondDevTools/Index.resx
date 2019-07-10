@@ -120,6 +120,9 @@
   <metadata name="toolStrip1.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>11, 9</value>
   </metadata>
+  <data name="txt_pageUrl.Text" xml:space="preserve">
+    <value>http://localhost:1005/std/02010404/79e1d951-481e-11e6-9b54-eca86bc39935.aspx?mode=1&amp;autoTitle=true&amp;_mp=blank&amp;ContractGUID=8b82d9c1-908d-e911-851f-6c4b90332fbf&amp;title=%E5%90%88%E5%90%8C%E4%BB%98%E6%AC%BE%E7%94%B3%E8%AF%B7&amp;_t=1562649029496&amp;_tFields=BUGUID%2CPROJGUID&amp;BUGUID=a4f70a84-5575-e911-a08f-005056c00008&amp;ProjGUID=e9bcdf4b-4778-e911-8967-005056c00008</value>
+  </data>
   <metadata name="timer_GetResponse.TrayLocation" type="System.Drawing.Point, System.Drawing, Version=4.0.0.0, Culture=neutral, PublicKeyToken=b03f5f7f11d50a3a">
     <value>121, 9</value>
   </metadata>

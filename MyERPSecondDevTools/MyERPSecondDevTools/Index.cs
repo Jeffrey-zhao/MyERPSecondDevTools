@@ -1,4 +1,5 @@
 ﻿using MyERPSecondDevTools.Common;
+using MyERPSecondDevTools.Model.Ext;
 using MyERPSecondDevTools.Model.Model;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
@@ -20,10 +21,6 @@ namespace MyERPSecondDevTools
     public partial class MyERPSecondDevTools : Form
     {
         #region 局部变量
-        /// <summary>
-        /// 浏览器控件
-        /// </summary>
-        private WebBrowser jsTreeWebBrowser = null;
         /// <summary>
         /// 明源ERP响应HTML
         /// </summary>
@@ -145,10 +142,13 @@ namespace MyERPSecondDevTools
         /// </summary>
         private void InitTxtPageUrlPlaceHolder()
         {
-            txt_pageUrl.Text = "请输入二开的页面地址";
+            if (txt_pageUrl.Text == "")
+            {
+                txt_pageUrl.Text = "请输入二开的页面地址";
 
-            txt_pageUrl.GotFocus += txtPageGotFocus;
-            txt_pageUrl.LostFocus += txtPageLostFocus;
+                txt_pageUrl.GotFocus += txtPageGotFocus;
+                txt_pageUrl.LostFocus += txtPageLostFocus;
+            }
         }
 
         /// <summary>
@@ -219,24 +219,6 @@ namespace MyERPSecondDevTools
         }
 
         /// <summary>
-        /// JS解析站点加载完成事件
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void webBrowser2_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
-        {
-
-            //JS语法解析站点
-            JsTreeSyntaxResponseHtml = jsTreeWebBrowser.Document.All[1].OuterHtml;
-            //获取JS语法树数据
-            GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
-            //加载树
-            InitTreeData();
-            //释放资源
-            jsTreeWebBrowser.Dispose();
-        }
-
-        /// <summary>
         /// Timer Tick
         /// </summary>
         /// <param name="sender"></param>
@@ -291,30 +273,23 @@ namespace MyERPSecondDevTools
             //业务JS源码数据
             var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
             JsSourceCodeData = jsContentModels;
-            //跳转到JS解析站点
-            jsTreeWebBrowser = new WebBrowser();
-            jsTreeWebBrowser.Navigate(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
-            jsTreeWebBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser2_DocumentCompleted);
+            //请求JS解析站点
+            var responseStr = ERPWebRequestHelper.GetWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
+            //JS语法解析站点
+            JsTreeSyntaxResponseHtml = responseStr;
+            //获取JS语法树数据
+            GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
+            //加载树
+            InitTreeData();
         }
 
         /// <summary>
         /// 获取JS语法树数据
         /// </summary>
-        /// <param name="responseHtml">解析站点响应的HTML</param>
-        private void GetJsSyntaxTree(string responseHtml)
+        /// <param name="responseStr">解析站点响应的数据</param>
+        private void GetJsSyntaxTree(string responseStr)
         {
-            MyERPBusinessJsSyntaxTreeModels = new List<MyERPBusinessJsSyntaxTreeModel>();
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(responseHtml);
-            var divList = doc.DocumentNode.SelectNodes("/html/body/div");
-            foreach (var item in divList)
-            {
-                MyERPBusinessJsSyntaxTreeModels.Add(new MyERPBusinessJsSyntaxTreeModel
-                {
-                    JsName = item.Attributes["id"].Value,
-                    JsSyntaxTreeJson = item.InnerHtml
-                });
-            }
+            MyERPBusinessJsSyntaxTreeModels = JsonConvert.DeserializeObject<List<MyERPBusinessJsSyntaxTreeModel>>(responseStr);
 
             Func<string, string> GetModuleName = jsonData =>
             {
@@ -337,15 +312,13 @@ namespace MyERPSecondDevTools
             {
                 foreach (var item2 in MyERPBusinessJsSyntaxTreeModels)
                 {
-                    var jsName1 = item.JsName.Substring(0, item.JsName.IndexOf("?"));
-                    var jsName2 = item2.JsName.Substring(0, item2.JsName.IndexOf("?"));
-                    if (jsName1.Equals(jsName2))
+                    if (item.JsName.Equals(item2.JsName))
                     {
                         var moduleName = GetModuleName(item2.JsSyntaxTreeJson);
                         if (moduleName != null)
                         {
                             MyERPBusJsAndTreeModel model = new MyERPBusJsAndTreeModel();
-                            model.JsPath = jsName1;
+                            model.JsPath = item.JsName;
                             model.JsSourceCode = item.JsContent;
                             model.JsSyntaxTree = item2.JsSyntaxTreeJson;
                             model.JsModuleName = moduleName;
@@ -354,7 +327,6 @@ namespace MyERPSecondDevTools
                     }
                 }
             }
-            var str = string.Empty;
         }
 
         /// <summary>
@@ -378,40 +350,46 @@ namespace MyERPSecondDevTools
             var divDesignerList = doc.DocumentNode.SelectNodes("//div[contains(@class,'nav-designer-sub-menu-item')]");
             foreach (var item in divDesignerList)
             {
-                if (item.Attributes["data-type"].Value != "page")
+                appFormDesignList.Add(new DesignModel
                 {
-                    appFormDesignList.Add(new DesignModel
-                    {
-                        DataId = item.Attributes["data-id"].Value,
-                        DataName = item.Attributes["data-name"].Value,
-                        DataLabel = convertDataLabel(item.Attributes["data-label"].Value),
-                        DataType = item.Attributes["data-type"].Value,
-                        DataItemType = item.Attributes["data-item-type"].Value,
-                    });
-                }
+                    DataId = item.Attributes["data-id"].Value,
+                    DataName = item.Attributes["data-name"].Value,
+                    DataLabel = convertDataLabel(item.Attributes["data-label"].Value),
+                    DataType = item.Attributes["data-type"].Value,
+                    DataItemType = item.Attributes["data-item-type"].Value,
+                });
             }
             //获取树数据
             var treeData = FiddlerHelper.GetControlMetaData(appFormDesignList);
             foreach (var item in treeData)
             {
-                TreeNode tn = new TreeNode();
+                TreeNodeExt tn = new TreeNodeExt();
                 tn.Text = item.Title;
+                tn.Type = "page";
+                tn.Expand();
                 foreach (var subItem in item.PluginPointModels)
                 {
                     if (subItem.Events != null && subItem.Events.Count > 0)
                     {
-                        TreeNode subTn = new TreeNode
+                        TreeNodeExt subTn = new TreeNodeExt
                         {
                             Text = subItem.Title,
-                            Tag = subItem.ControlId
+                            Tag = subItem.ControlId,
+                            Type = "point"
                         };
 
                         foreach (var secItem in subItem.Events)
                         {
-                            TreeNode secTn = new TreeNode
+                            var trimFunctionName = secItem.FunctionName.TrimEnd(';');
+                            var jsModuleName = trimFunctionName.Substring(0, trimFunctionName.LastIndexOf('.'));
+                            var jsFunctionName = trimFunctionName.Substring(trimFunctionName.LastIndexOf('.') + 1);
+                            TreeNodeExt secTn = new TreeNodeExt
                             {
-                                Text = secItem.FunctionName,
-                                Tag = secItem.FunctionName
+                                Text = trimFunctionName,
+                                Tag = trimFunctionName,
+                                Type = "event",
+                                JsModuleName = jsModuleName,
+                                JsFunctionName = jsFunctionName
                             };
                             subTn.Nodes.Add(secTn);
                         }
@@ -422,6 +400,58 @@ namespace MyERPSecondDevTools
                 tv_code.Nodes.Add(tn);
             }
             tabControl.SelectedTab = tabPage2;
+        }
+
+        /// <summary>
+        /// 获取方法扩展列表，返回Before、After、Override
+        /// </summary>
+        /// <param name="jsModuleName"></param>
+        /// <param name="functionName"></param>
+        /// <returns></returns>
+        private List<string> GetPluginFunctionName(string jsModuleName, string functionName)
+        {
+            jsModuleName = jsModuleName.Replace(GlobalData.ERPHost, string.Empty);
+            return null;
+        }
+
+        /// <summary>
+        /// MouseDown是鼠标按下事件发生在你鼠标单击事件之前,你单击鼠标发生了两个动作,
+        /// 一是鼠标按下二是鼠标抬起.执行之后,就会把SelectedNode转变成你鼠标点的那个节点了
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tv_code_MouseDown(object sender, MouseEventArgs e)
+        {
+            tv_code.SelectedNode = tv_code.GetNodeAt(e.X, e.Y);
+        }
+
+        /// <summary>
+        /// TreeView节点单击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void tv_code_Click(object sender, EventArgs e)
+        {
+            var selectNode = (TreeNodeExt)tv_code.SelectedNode;
+            if (selectNode.Type == "event")
+            {
+                var jsSourceData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
+                if (jsSourceData != null)
+                {
+                    richTextBox1.Text = jsSourceData.JsSourceCode;
+                    
+                }
+                else
+                    richTextBox1.Text = "未找到对应源码，请手动查找！";
+            }
+        }
+
+        /// <summary>
+        /// 初始化JS方法引用
+        /// </summary>
+        private void InitJsFunctionReference(TreeNodeExt selectNode, MyERPBusJsAndTreeModel jsSourceData)
+        {
+
         }
         #endregion
     }

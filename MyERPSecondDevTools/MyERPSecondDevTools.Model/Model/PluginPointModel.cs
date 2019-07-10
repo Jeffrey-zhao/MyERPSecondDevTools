@@ -27,6 +27,11 @@ namespace MyERPSecondDevTools.Model.Model
         public string Title { get; set; }
 
         /// <summary>
+        /// 元数据状态
+        /// </summary>
+        public string MetaDataStatus { get; set; }
+
+        /// <summary>
         /// 事件列表
         /// </summary>
         public List<PluginPointModelEvent> Events { get; set; }
