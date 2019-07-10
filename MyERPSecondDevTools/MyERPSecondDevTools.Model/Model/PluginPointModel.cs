@@ -48,5 +48,11 @@ namespace MyERPSecondDevTools.Model.Model
         /// 事件名
         /// </summary>
         public string EventName { get; set; }
+
+
+        /// <summary>
+        /// 是否产品方法
+        /// </summary>
+        public bool IsProduct { get; set; }
     }
 }

@@ -30,7 +30,7 @@ namespace MyERPSecondDevTools.Common
             GlobalData.ERPHost = host;
 
             //OA集成登录地址
-            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?UserCode={GlobalData.ERPUserCode}&PageUrl={System.Web.HttpUtility.UrlEncode(pageUrl)}";
+            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?{GlobalData.ERPUserCodeParamName}={GlobalData.ERPUserCode}&{GlobalData.ERPJumpPageParamName}={System.Web.HttpUtility.UrlEncode(pageUrl)}";
             return formatRequestUrl;
         }
 
@@ -61,7 +61,7 @@ namespace MyERPSecondDevTools.Common
                     models.Add(new MyERPBusinessJsModel
                     {
                         ApplicationId = applicationId,
-                        JsName = m,
+                        JsName = m.Substring(0, m.IndexOf("?")),
                         JsContent = downLoadString
                     });
                 }
@@ -146,7 +146,7 @@ namespace MyERPSecondDevTools.Common
                 sqlHelper.ExecuteNonQuery(strSql, new SqlParameter[]
                 {
                     new SqlParameter("applicationId", applicationId),
-                    new SqlParameter("jsName", m.JsName.Substring(0, m.JsName.IndexOf("?"))),
+                    new SqlParameter("jsName", m.JsName),
                     new SqlParameter("jsContent", m.JsContent),
                 });
             });
@@ -164,9 +164,9 @@ namespace MyERPSecondDevTools.Common
             Func<string, string, string> GetTitleByName = (functionName, name) =>
             {
                 if (functionName.Contains("_appForm_load"))
-                    return "页面加载事件";
+                    return "表单加载完成事件";
                 else if (functionName.Contains("_Grid_load"))
-                    return "网格加载事件";
+                    return "网格加载完成事件";
                 else if (functionName.Contains("_Grid_query"))
                     return "网格查询事件";
                 else if (functionName.Contains("_appForm_beforeSubmit"))
@@ -248,15 +248,20 @@ namespace MyERPSecondDevTools.Common
                                     Title = GetToolBarTitleByName(item["type"].ToString(), subItem["align"].ToString()) + "-" + secItem["title"].ToString(),
                                     Events = new List<PluginPointModelEvent>()
                                 };
+                                var flag = true;
                                 foreach (var fourItem in secItem["events"])
                                 {
-                                    model.Events.Add(new PluginPointModelEvent
-                                    {
-                                        EventName = fourItem["name"].ToString(),
-                                        FunctionName = fourItem["functionName"].ToString(),
-                                    });
+                                    if (fourItem["functionName"].ToString().StartsWith("Mysoft.Map"))
+                                        flag = false;
+                                    else
+                                        model.Events.Add(new PluginPointModelEvent
+                                        {
+                                            EventName = fourItem["name"].ToString(),
+                                            FunctionName = fourItem["functionName"].ToString(),
+                                        });
                                 }
-                                pluginPointModels.Add(model);
+                                if (flag)
+                                    pluginPointModels.Add(model);
                             }
                         }
                     }
@@ -282,10 +287,17 @@ namespace MyERPSecondDevTools.Common
                         {
                             if (sitem.FunctionName.IndexOf(".") <= 0)
                             {
-                                if (item.MetaDataStatus == "customize")
+                                //页面是产品页面，按钮是二开，则更新为Plugin
+                                if (jsonObject["item"]["metadataStatus"].ToString() == "product" && item.MetaDataStatus == "customize")
+                                {
                                     sitem.FunctionName = pageModuleName + ".Plugin." + sitem.FunctionName;
+                                    sitem.IsProduct = false;
+                                }
                                 else
+                                {
                                     sitem.FunctionName = pageModuleName + "." + sitem.FunctionName;
+                                    sitem.IsProduct = true;
+                                }
                             }
                         });
                     });

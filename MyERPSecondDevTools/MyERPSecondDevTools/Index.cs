@@ -45,6 +45,16 @@ namespace MyERPSecondDevTools
         /// JS源码语法树聚合数据
         /// </summary>
         private List<MyERPBusJsAndTreeModel> MyERPBusJsAndTreeModels { get; set; }
+
+        /// <summary>
+        /// JS扩展方法集合
+        /// </summary>
+        private List<GetJsPluginFunctionResponse> JsPluginFunctionList { get; set; }
+
+        /// <summary>
+        /// JS方法引用AppService方法集合
+        /// </summary>
+        private List<GetJsAppServiceReferenceResponse> JsAppServiceReferenceList { get; set; }
         #endregion
 
 
@@ -291,21 +301,6 @@ namespace MyERPSecondDevTools
         {
             MyERPBusinessJsSyntaxTreeModels = JsonConvert.DeserializeObject<List<MyERPBusinessJsSyntaxTreeModel>>(responseStr);
 
-            Func<string, string> GetModuleName = jsonData =>
-            {
-                JObject jsonObject = (JObject)JToken.Parse(jsonData);
-                var bodyType = jsonObject["body"][0]["type"];
-                if (bodyType.ToString() == "ExpressionStatement")
-                {
-                    var expression = jsonObject["body"][0]["expression"];
-                    if (expression["callee"]["name"].ToString() == "define")
-                    {
-                        var moduleName = expression["arguments"][0]["value"].ToString();
-                        return moduleName;
-                    }
-                }
-                return null;
-            };
             //组合源码语法树聚合数据
             MyERPBusJsAndTreeModels = new List<MyERPBusJsAndTreeModel>();
             foreach (var item in JsSourceCodeData)
@@ -314,7 +309,7 @@ namespace MyERPSecondDevTools
                 {
                     if (item.JsName.Equals(item2.JsName))
                     {
-                        var moduleName = GetModuleName(item2.JsSyntaxTreeJson);
+                        var moduleName = GetModuleNameByJsSynataxData(item2.JsSyntaxTreeJson);
                         if (moduleName != null)
                         {
                             MyERPBusJsAndTreeModel model = new MyERPBusJsAndTreeModel();
@@ -327,6 +322,26 @@ namespace MyERPSecondDevTools
                     }
                 }
             }
+        }
+
+        /// <summary>
+        /// 根据JS语法树获取模块名
+        /// </summary>
+        /// <param name="jsonData"></param>
+        private string GetModuleNameByJsSynataxData(string jsonData)
+        {
+            JObject jsonObject = (JObject)JToken.Parse(jsonData);
+            var bodyType = jsonObject["body"][0]["type"];
+            if (bodyType.ToString() == "ExpressionStatement")
+            {
+                var expression = jsonObject["body"][0]["expression"];
+                if (expression["callee"]["name"].ToString() == "define")
+                {
+                    var moduleName = expression["arguments"][0]["value"].ToString();
+                    return moduleName;
+                }
+            }
+            return null;
         }
 
         /// <summary>
@@ -361,6 +376,17 @@ namespace MyERPSecondDevTools
             }
             //获取树数据
             var treeData = FiddlerHelper.GetControlMetaData(appFormDesignList);
+
+            #region 解析JS语法请求Model
+            //获取扩展方法请求Model
+            GetJsPluginFunctionRequest getJsPluginFunctionRequest = new GetJsPluginFunctionRequest();
+            GetJsPluginFunctionRequest getJsAppServiceReferenceRequest = new GetJsPluginFunctionRequest();
+            getJsPluginFunctionRequest.applicationId = GlobalData.ApplicationId.ToString();
+            getJsPluginFunctionRequest.body = new List<GetJsPluginFunctionRequestBody>();
+            getJsAppServiceReferenceRequest.applicationId = GlobalData.ApplicationId.ToString();
+            getJsAppServiceReferenceRequest.body = new List<GetJsPluginFunctionRequestBody>();
+            #endregion
+
             foreach (var item in treeData)
             {
                 TreeNodeExt tn = new TreeNodeExt();
@@ -391,6 +417,63 @@ namespace MyERPSecondDevTools
                                 JsModuleName = jsModuleName,
                                 JsFunctionName = jsFunctionName
                             };
+                            var groupData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == jsModuleName);
+                            if (groupData != null)
+                            {
+
+                                var jsPath = string.Empty;
+                                if (groupData.JsPath.Contains("/Customize/"))
+                                    jsPath = groupData.JsPath;
+                                else
+                                {
+                                    var tempStr = groupData.JsPath.Replace(GlobalData.ERPHost, string.Empty);
+                                    jsPath = GlobalData.ERPHost + "/Customize" + tempStr;
+                                }
+                                jsFunctionName = jsFunctionName.Contains("(") ? jsFunctionName.Substring(0, jsFunctionName.IndexOf("(")) : jsFunctionName;
+                                secTn.PluginJsPath = jsPath;
+                                secTn.JsFunctionNameValue = jsFunctionName;
+
+                                getJsPluginFunctionRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                {
+                                    functionName = jsFunctionName,
+                                    moduleName = jsPath
+                                });
+
+                                if (!secItem.IsProduct)
+                                {
+                                    getJsAppServiceReferenceRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                    {
+                                        functionName = jsFunctionName,
+                                        moduleName = jsPath
+                                    });
+
+                                    getJsAppServiceReferenceRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                    {
+                                        functionName = jsFunctionName,
+                                        moduleName = jsPath,
+                                        pluginName = "before"
+                                    });
+
+                                    getJsAppServiceReferenceRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                    {
+                                        functionName = jsFunctionName,
+                                        moduleName = jsPath,
+                                        pluginName = "after"
+                                    });
+
+                                    getJsAppServiceReferenceRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                    {
+                                        functionName = jsFunctionName,
+                                        moduleName = jsPath,
+                                        pluginName = "override"
+                                    });
+                                }
+                                getJsAppServiceReferenceRequest.body.Add(new GetJsPluginFunctionRequestBody
+                                {
+                                    functionName = jsFunctionName,
+                                    moduleName = groupData.JsPath
+                                });
+                            }
                             subTn.Nodes.Add(secTn);
                         }
 
@@ -399,19 +482,18 @@ namespace MyERPSecondDevTools
                 }
                 tv_code.Nodes.Add(tn);
             }
-            tabControl.SelectedTab = tabPage2;
-        }
+            //请求解析站点，获取JS方法对应的扩展方法
+            var jsonPostData = JsonConvert.SerializeObject(getJsPluginFunctionRequest);
+            var responseData = ERPWebRequestHelper.PostWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "GetPluginFunction", jsonPostData, Encoding.UTF8);
+            JsPluginFunctionList = JsonConvert.DeserializeObject<List<GetJsPluginFunctionResponse>>(responseData);
 
-        /// <summary>
-        /// 获取方法扩展列表，返回Before、After、Override
-        /// </summary>
-        /// <param name="jsModuleName"></param>
-        /// <param name="functionName"></param>
-        /// <returns></returns>
-        private List<string> GetPluginFunctionName(string jsModuleName, string functionName)
-        {
-            jsModuleName = jsModuleName.Replace(GlobalData.ERPHost, string.Empty);
-            return null;
+            //请求解析站点，获取JS方法对应的扩展方法
+            var jsonPostData2 = JsonConvert.SerializeObject(getJsAppServiceReferenceRequest);
+            var responseData2 = ERPWebRequestHelper.PostWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "GetAppServicesFunction", jsonPostData2, Encoding.UTF8);
+            JsAppServiceReferenceList = JsonConvert.DeserializeObject<List<GetJsAppServiceReferenceResponse>>(responseData2);
+
+
+            tabControl.SelectedTab = tabPage2;
         }
 
         /// <summary>
@@ -433,25 +515,97 @@ namespace MyERPSecondDevTools
         private void tv_code_Click(object sender, EventArgs e)
         {
             var selectNode = (TreeNodeExt)tv_code.SelectedNode;
-            if (selectNode.Type == "event")
+            if (selectNode.Type == "event" || selectNode.Type == "pluginEvent" || selectNode.Type == "appServiceEvent")
             {
                 var jsSourceData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
                 if (jsSourceData != null)
                 {
                     richTextBox1.Text = jsSourceData.JsSourceCode;
-                    
+
                 }
                 else
                     richTextBox1.Text = "未找到对应源码，请手动查找！";
+
+                if (selectNode.Type == "event" || selectNode.Type == "pluginEvent")
+                {
+                    foreach (TreeNodeExt item in selectNode.Nodes)
+                    {
+                        InitAppService(item);
+                    }
+                }
+            }
+            else if (selectNode.Type == "point")
+            {
+                foreach (TreeNodeExt item in selectNode.Nodes)
+                {
+                    InitPluginMethod(item);
+                    InitAppService(item);
+                }
             }
         }
 
         /// <summary>
-        /// 初始化JS方法引用
+        /// 获取方法扩展列表，返回Before、After、Override
         /// </summary>
-        private void InitJsFunctionReference(TreeNodeExt selectNode, MyERPBusJsAndTreeModel jsSourceData)
+        private void InitPluginMethod(TreeNodeExt selectNode)
         {
+            if (selectNode.Nodes == null || selectNode.Nodes.Count == 0)
+            {
+                if (JsPluginFunctionList != null && JsPluginFunctionList.Count > 0)
+                {
+                    var plugin = JsPluginFunctionList.FirstOrDefault(p => p.moduleName == selectNode.PluginJsPath && p.functionName == selectNode.JsFunctionNameValue);
+                    if (plugin != null && plugin.pluginFunctions != null && plugin.pluginFunctions.Count > 0)
+                    {
+                        var pluginData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsPath == selectNode.PluginJsPath);
+                        if (pluginData != null)
+                        {
+                            foreach (var item in plugin.pluginFunctions)
+                            {
+                                TreeNodeExt tn = new TreeNodeExt
+                                {
+                                    Text = item,
+                                    Tag = item,
+                                    Type = "pluginEvent",
+                                    JsModuleName = !selectNode.JsModuleName.Contains("Plugin") ? selectNode.JsModuleName + ".Plugin" : selectNode.JsModuleName, //扩展方法，定义到Plugin模块
+                                    JsFunctionName = selectNode.JsFunctionName,
+                                    JsFunctionNameValue = selectNode.JsFunctionNameValue
+                                };
+                                selectNode.Nodes.Add(tn);
+                            }
+                        }
+                    }
+                }
+            }
+        }
 
+        /// <summary>
+        /// 获取方法扩展列表，返回Before、After、Override
+        /// </summary>
+        private void InitAppService(TreeNodeExt selectNode)
+        {
+            if (selectNode.Nodes == null || selectNode.Nodes.Count == 0)
+            {
+                if (JsAppServiceReferenceList != null && JsAppServiceReferenceList.Count > 0)
+                {
+                    var appServices = JsAppServiceReferenceList.FirstOrDefault(p => p.moduleName == selectNode.JsModuleName && p.functionName == selectNode.JsFunctionNameValue && p.pluginName == selectNode.Text);
+                    if (appServices != null && appServices.appServiceFunctions != null && appServices.appServiceFunctions.Count > 0)
+                    {
+                        foreach (var item in appServices.appServiceFunctions)
+                        {
+                            TreeNodeExt tn = new TreeNodeExt
+                            {
+                                Text = item.functionName,
+                                Tag = item.appServiceName + item.functionName,
+                                Type = "appServiceEvent",
+                                JsModuleName = item.appServiceName, //扩展方法，定义到Plugin模块
+                                JsFunctionName = item.functionName,
+                                JsFunctionNameValue = item.functionName
+                            };
+                            selectNode.Nodes.Add(tn);
+                        }
+                    }
+                }
+            }
         }
         #endregion
     }

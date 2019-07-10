@@ -26,6 +26,16 @@ namespace MyERPSecondDevTools.Common
         public static string ERPSQLConnectionString { get; set; }
 
         /// <summary>
+        /// 用户编码参数名称
+        /// </summary>
+        public static string ERPUserCodeParamName { get; set; }
+
+        /// <summary>
+        /// 跳转页面参数名称
+        /// </summary>
+        public static string ERPJumpPageParamName { get; set; }
+
+        /// <summary>
         /// ERP系统登录用户编码
         /// </summary>
         public static string ERPUserCode { get { return ConfigurationManager.AppSettings["erpUserCode"]; } }

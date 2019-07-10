@@ -83,7 +83,14 @@ namespace MyERPSecondDevTools.Common
             var isEnable = Convert.ToBoolean(sqlHelper.ExecuteScalar("SELECT IsEnable FROM p_OAIntegrateConfig WHERE SchemeCode = 'Code'"));
             if (!isEnable)
             {
-                sqlHelper.ExecuteNonQuery("UPDATE p_OAIntegrateConfig SET IsEnable = 1 WHERE SchemeCode = 'Code'");
+                sqlHelper.ExecuteNonQuery("UPDATE p_OAIntegrateConfig SET IsEnable = 1 WHERE SchemeCode = 'Code'; UPDATE p_UserCodeVerify SET UserCodeContrast = 0 ,EncryptionType = 0");
+            }
+
+            var pubData = sqlHelper.ExecuteReader("SELECT TOP 1 UserCodeParamName, JumpPageParamName FROM p_UserCodeVerify");
+            if (pubData != null && pubData.Count > 0)
+            {
+                GlobalData.ERPUserCodeParamName = pubData[0]["UserCodeParamName"];
+                GlobalData.ERPJumpPageParamName = pubData[0]["JumpPageParamName"];
             }
         }
 
