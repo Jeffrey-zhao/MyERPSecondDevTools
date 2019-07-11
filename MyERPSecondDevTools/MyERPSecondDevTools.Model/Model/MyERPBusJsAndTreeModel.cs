@@ -17,6 +17,11 @@ namespace MyERPSecondDevTools.Model.Model
         public string JsPath { get; set; }
 
         /// <summary>
+        /// JS本地路径
+        /// </summary>
+        public string JsLocalPath { get; set; }
+
+        /// <summary>
         /// JS源码
         /// </summary>
         public string JsSourceCode { get; set; }

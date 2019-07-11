@@ -5,6 +5,7 @@ var esprima = require('esprima');
 estraverse = require('estraverse');
 /* GET home page. */
 
+//获取JS语法树数据
 router.get('/', function (req, res, next) {
   //获取JS源码数据，转换为JS语法树结构数据
   async function getData(applicationId, callback) {
@@ -13,14 +14,19 @@ router.get('/', function (req, res, next) {
   }
   getData(req.param('applicationId'), function (jsData) {
     var jsTreeData = [];
+    var updateStr = "";
     jsData.recordsets[0].forEach(element => {
       var esprimaTree = esprima.parseScript(element.JsData);
       var strEsprimaTree = JSON.stringify(esprimaTree);
+      var moduleName = esprimaTree.body[0].expression.arguments[0].value;
+      updateStr+=" UPDATE dbo.MyERPDevToolsScripts SET JsModuleName='"+moduleName+"' WHERE ApplicationId='" + element.ApplicationId + "' AND JsName='"+element.JsName+"';";
       jsTreeData.push({
-        JsName: element.JsName,
+        JsPath: element.JsName,
+        JsModuleName: esprimaTree.body[0].expression.arguments[0].value,
         JsSyntaxTreeJson: strEsprimaTree
       });
     });
+    db(updateStr);
     res.send(jsTreeData);
   });
 });
@@ -31,7 +37,7 @@ router.post('/GetPluginFunction', function (req, res, next) {
   async function getData(param, callback) {
     var strSqlFilter = "";
     param.body.forEach(item => {
-      strSqlFilter += " or JsName = '" + item.moduleName + "'";
+      strSqlFilter += " or JsModuleName = '" + item.moduleName + "'";
     });
     var strSql = "select * from MyERPDevToolsScripts where ApplicationId='" + param.applicationId + "' and (1=0 " + strSqlFilter + ")";
     const jsData = await db(strSql);
@@ -45,14 +51,15 @@ router.post('/GetPluginFunction', function (req, res, next) {
     var result = [];
     data.recordsets[0].forEach(element => {
       req.body.body.forEach(item => {
-        if (element.JsName == item.moduleName) {
+        var jsData = element.JsData;
+        var ast = esprima.parseScript(jsData);
+        var moduleName = ast.body[0].expression.arguments[0].value;
+        if (moduleName == item.moduleName) {
           var resultItem = {
             pluginFunctions: []
           };
           resultItem.moduleName = item.moduleName;
           resultItem.functionName = item.functionName;
-          var jsData = element.JsData;
-          var ast = esprima.parseScript(jsData);
           var parentNode;
           var secondParentNode;
           var nodes = [];
@@ -102,7 +109,7 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
   async function getData(param, callback) {
     var strSqlFilter = "";
     param.body.forEach(item => {
-      strSqlFilter += " or JsName = '" + item.moduleName + "'";
+      strSqlFilter += " or JsModuleName = '" + item.moduleName + "'";
     });
     var strSql = "select * from MyERPDevToolsScripts where ApplicationId='" + param.applicationId + "' and (1=0 " + strSqlFilter + ")";
     const jsData = await db(strSql);
@@ -116,13 +123,14 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
     var result = [];
     data.recordsets[0].forEach(element => {
       req.body.body.forEach(item => {
-        if (element.JsName == item.moduleName) {
+        var jsData = element.JsData;
+        var ast = esprima.parseScript(jsData);
+        var moduleName = ast.body[0].expression.arguments[0].value;
+        if (moduleName == item.moduleName) {
           var resultItem = {
             appServiceFunctions: []
           };
-          var jsData = element.JsData;
-          var ast = esprima.parseScript(jsData);
-          resultItem.moduleName = ast.body[0].expression.arguments[0].value;
+          resultItem.moduleName = moduleName;
           resultItem.functionName = item.functionName;
           resultItem.pluginName = item.pluginName;
           var parentNode;
@@ -144,58 +152,58 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
           if (!appServices) {
             return true;
           }
-          
-            estraverse.traverse(ast, {
+
+          estraverse.traverse(ast, {
+            enter: function (node, parent) {
+              if (node.type == "Property" && node.key != null && node.key.name == item.functionName) {
+                parentNode = node;
+                this.break();
+              }
+            }
+          });
+
+          if (!parentNode)
+            return true;
+
+          if (item.pluginName) {
+            estraverse.traverse(parentNode, {
               enter: function (node, parent) {
-                if (node.type == "Property" && node.key != null && node.key.name == item.functionName) {
-                  parentNode = node;
+                if (node.type == "Property" && node.key.name == item.pluginName) {
+                  secondParentNode = node;
                   this.break();
                 }
               }
             });
+          }
 
-            if(!parentNode)
-              return true;
+          if (!secondParentNode)
+            secondParentNode = parentNode;
 
-            if(item.pluginName){
-              estraverse.traverse(parentNode, {
-                enter: function (node, parent) {
-                  if (node.type == "Property" && node.key.name == item.pluginName) {
-                    secondParentNode = node;
-                    this.break();
+          estraverse.traverse(secondParentNode, {
+            enter: function (node, parent) {
+              if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
+                var flag = false;
+                var temp;
+                for (var i = 0; i < appServices.length; i++) {
+                  if (appServices[i].identifierAppServiceName == node.callee.object.name) {
+                    flag = true;
+                    temp = appServices[i];
+                    break;
                   }
                 }
-              });
-            }
-
-            if(!secondParentNode)
-              secondParentNode = parentNode;
-
-            estraverse.traverse(secondParentNode, {
-              enter: function (node, parent) {
-                if (node.type === 'CallExpression' && node.callee.type === 'MemberExpression') {
-                  var flag = false;
-                  var temp;
-                  for (var i = 0; i < appServices.length; i++) {
-                    if (appServices[i].identifierAppServiceName == node.callee.object.name) {
-                      flag = true;
-                      temp = appServices[i];
-                      break;
-                    }
-                  }
-                  if (flag) {
-                    resultItem.appServiceFunctions.push({
-                      appServiceName: temp.appServiceName,
-                      callName: temp.identifierAppServiceName,
-                      functionName: node.callee.property.name
-                    });
-                  }
+                if (flag) {
+                  resultItem.appServiceFunctions.push({
+                    appServiceName: temp.appServiceName,
+                    callName: temp.identifierAppServiceName,
+                    functionName: node.callee.property.name
+                  });
                 }
               }
-            });
-            if (resultItem.appServiceFunctions.length > 0)
+            }
+          });
+          if (resultItem.appServiceFunctions.length > 0)
             result.push(resultItem);
-          }
+        }
       });
     });
     res.send(result);

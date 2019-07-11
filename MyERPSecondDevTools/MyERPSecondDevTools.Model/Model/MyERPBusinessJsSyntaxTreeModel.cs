@@ -11,7 +11,9 @@ namespace MyERPSecondDevTools.Model.Model
     /// </summary>
     public class MyERPBusinessJsSyntaxTreeModel
     {
-        public string JsName { get; set; }
+        public string JsPath { get; set; }
+
+        public string JsModuleName { get; set; }
 
         public string JsSyntaxTreeJson { get; set; }
     }

@@ -28,10 +28,5 @@ namespace MyERPSecondDevTools.Model.Ext
         /// 去掉后缀的JS方法名
         /// </summary>
         public string JsFunctionNameValue { get; set; }
-
-        /// <summary>
-        /// 对应的扩展JS路径
-        /// </summary>
-        public string PluginJsPath { get; set; }
     }
 }
