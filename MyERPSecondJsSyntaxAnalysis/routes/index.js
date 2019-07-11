@@ -19,7 +19,7 @@ router.get('/', function (req, res, next) {
       var esprimaTree = esprima.parseScript(element.JsData);
       var strEsprimaTree = JSON.stringify(esprimaTree);
       var moduleName = esprimaTree.body[0].expression.arguments[0].value;
-      updateStr+=" UPDATE dbo.MyERPDevToolsScripts SET JsModuleName='"+moduleName+"' WHERE ApplicationId='" + element.ApplicationId + "' AND JsName='"+element.JsName+"';";
+      updateStr += " UPDATE dbo.MyERPDevToolsScripts SET JsModuleName='" + moduleName + "' WHERE ApplicationId='" + element.ApplicationId + "' AND JsName='" + element.JsName + "';";
       jsTreeData.push({
         JsPath: element.JsName,
         JsModuleName: esprimaTree.body[0].expression.arguments[0].value,
@@ -203,6 +203,102 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
           });
           if (resultItem.appServiceFunctions.length > 0)
             result.push(resultItem);
+        }
+      });
+    });
+    res.send(result);
+  });
+});
+
+//获取指定模块下所有方法列表
+router.post('/GetAllFunctionByModule', function (req, res, next) {
+  //获取指定方法源码
+  async function getData(param, callback) {
+    var strSqlFilter = "";
+    param.body.forEach(item => {
+      strSqlFilter += " or JsModuleName = '" + item.moduleName + "'";
+    });
+    var strSql = "select * from MyERPDevToolsScripts where ApplicationId='" + param.applicationId + "' and (1=0 " + strSqlFilter + ")";
+    const jsData = await db(strSql);
+    if (jsData.recordset.length > 0)
+      callback(jsData);
+    else
+      res.send([]);
+  }
+
+  getData(req.body, function (data) {
+    var result = [];
+    data.recordsets[0].forEach(element => {
+      req.body.body.forEach(item => {
+        var jsData = element.JsData;
+        var ast = esprima.parseScript(jsData);
+        var moduleName = ast.body[0].expression.arguments[0].value;
+        if (moduleName == item.moduleName) {
+          var resultItem = {
+            moduleName: item.moduleName,
+            functions: []
+          };
+          var parentNode;
+          estraverse.traverse(ast, {
+            enter: function (node, parent) {
+              if (node.type == "Identifier" && node.name == "ns") {
+                parentNode = parent;
+                this.break();
+              }
+            }
+          });
+          if (parentNode == null) {
+            return true;
+          }
+          parentNode.init.properties.forEach(element => {
+            if (element.type == "Property" && element.value.type == "FunctionExpression") {
+              var functionData = {
+                type: "normal",
+                name: element.key.name,
+                params: []
+              };
+              if (element.value.params != null && element.value.params.length > 0) {
+                element.value.params.forEach(eitem => {
+                  functionData.params.push(eitem.name);
+                })
+              }
+              resultItem.functions.push(functionData);
+            }
+          });
+
+          if (item.moduleName.indexOf('Plugin') > 0) {
+            var secondParentNode;
+            estraverse.traverse(parentNode, {
+              enter: function (node, parent) {
+                if (node.type == "Property" && node.key != null && node.key.name == "__module_plugins__"){
+                  secondParentNode = node;
+                }
+              }
+            });
+            if (secondParentNode == null) {
+              return true;
+            }
+            var pluginMethodNode;
+            estraverse.traverse(secondParentNode, {
+              enter: function (node, parent) {
+                if (node.type == "ObjectExpression" && parent != null && parent.type == "Property" && parent.kind == "init" && parent.key.name=="__module_plugins__") {
+                  pluginMethodNode = node;
+                  this.break();
+                }
+              }
+            });
+            if(pluginMethodNode != null && pluginMethodNode.properties != null && pluginMethodNode.properties.length > 0){
+              pluginMethodNode.properties.forEach(pitem =>{
+                var functionData = {
+                  type: "plugin",
+                  name: pitem.key.name,
+                  params: []
+                };
+                resultItem.functions.push(functionData);
+              });
+            }
+          }
+          result.push(resultItem);
         }
       });
     });

@@ -43,6 +43,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Ext\TreeNodeExt.cs" />
+    <Compile Include="GetJsModuleAllFunctionRequest.cs" />
     <Compile Include="Model\AppDataModel.cs" />
     <Compile Include="Model\DesignModel.cs" />
     <Compile Include="Model\ControlMetadataModel.cs" />
