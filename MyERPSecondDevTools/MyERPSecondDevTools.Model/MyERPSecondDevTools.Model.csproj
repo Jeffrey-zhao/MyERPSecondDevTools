@@ -43,11 +43,12 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Ext\TreeNodeExt.cs" />
-    <Compile Include="GetJsModuleAllFunctionRequest.cs" />
+    <Compile Include="Model\GetJsModuleAllFunctionRequest.cs" />
     <Compile Include="Model\AppDataModel.cs" />
     <Compile Include="Model\DesignModel.cs" />
     <Compile Include="Model\ControlMetadataModel.cs" />
     <Compile Include="Model\GetJsAppServiceReferenceResponse.cs" />
+    <Compile Include="Model\GetJsModuleAllFunctionResponse.cs" />
     <Compile Include="Model\GetJsPluginFunctionRequest.cs" />
     <Compile Include="Model\GetJsPluginFunctionResponse.cs" />
     <Compile Include="Model\ModulePluginPointModel.cs" />

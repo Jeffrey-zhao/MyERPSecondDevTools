@@ -50,9 +50,10 @@ router.post('/GetPluginFunction', function (req, res, next) {
   getData(req.body, function (data) {
     var result = [];
     data.recordsets[0].forEach(element => {
+      var jsData = element.JsData;
+      var ast = esprima.parseScript(jsData);
       req.body.body.forEach(item => {
-        var jsData = element.JsData;
-        var ast = esprima.parseScript(jsData);
+
         var moduleName = ast.body[0].expression.arguments[0].value;
         if (moduleName == item.moduleName) {
           var resultItem = {
@@ -108,6 +109,7 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
   //获取指定方法源码
   async function getData(param, callback) {
     var strSqlFilter = "";
+    var tempJsModule = [];
     param.body.forEach(item => {
       strSqlFilter += " or JsModuleName = '" + item.moduleName + "'";
     });
@@ -122,9 +124,9 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
   getData(req.body, function (data) {
     var result = [];
     data.recordsets[0].forEach(element => {
+      var jsData = element.JsData;
+      var ast = esprima.parseScript(jsData);
       req.body.body.forEach(item => {
-        var jsData = element.JsData;
-        var ast = esprima.parseScript(jsData);
         var moduleName = ast.body[0].expression.arguments[0].value;
         if (moduleName == item.moduleName) {
           var resultItem = {
@@ -229,9 +231,10 @@ router.post('/GetAllFunctionByModule', function (req, res, next) {
   getData(req.body, function (data) {
     var result = [];
     data.recordsets[0].forEach(element => {
+      var jsData = element.JsData;
+      var ast = esprima.parseScript(jsData);
       req.body.body.forEach(item => {
-        var jsData = element.JsData;
-        var ast = esprima.parseScript(jsData);
+
         var moduleName = ast.body[0].expression.arguments[0].value;
         if (moduleName == item.moduleName) {
           var resultItem = {
@@ -255,11 +258,11 @@ router.post('/GetAllFunctionByModule', function (req, res, next) {
               var functionData = {
                 type: "normal",
                 name: element.key.name,
-                params: []
+                argsParams: []
               };
               if (element.value.params != null && element.value.params.length > 0) {
                 element.value.params.forEach(eitem => {
-                  functionData.params.push(eitem.name);
+                  functionData.argsParams.push(eitem.name);
                 })
               }
               resultItem.functions.push(functionData);
@@ -270,7 +273,7 @@ router.post('/GetAllFunctionByModule', function (req, res, next) {
             var secondParentNode;
             estraverse.traverse(parentNode, {
               enter: function (node, parent) {
-                if (node.type == "Property" && node.key != null && node.key.name == "__module_plugins__"){
+                if (node.type == "Property" && node.key != null && node.key.name == "__module_plugins__") {
                   secondParentNode = node;
                 }
               }
@@ -281,18 +284,18 @@ router.post('/GetAllFunctionByModule', function (req, res, next) {
             var pluginMethodNode;
             estraverse.traverse(secondParentNode, {
               enter: function (node, parent) {
-                if (node.type == "ObjectExpression" && parent != null && parent.type == "Property" && parent.kind == "init" && parent.key.name=="__module_plugins__") {
+                if (node.type == "ObjectExpression" && parent != null && parent.type == "Property" && parent.kind == "init" && parent.key.name == "__module_plugins__") {
                   pluginMethodNode = node;
                   this.break();
                 }
               }
             });
-            if(pluginMethodNode != null && pluginMethodNode.properties != null && pluginMethodNode.properties.length > 0){
-              pluginMethodNode.properties.forEach(pitem =>{
+            if (pluginMethodNode != null && pluginMethodNode.properties != null && pluginMethodNode.properties.length > 0) {
+              pluginMethodNode.properties.forEach(pitem => {
                 var functionData = {
                   type: "plugin",
                   name: pitem.key.name,
-                  params: []
+                  argsParams: []
                 };
                 resultItem.functions.push(functionData);
               });
