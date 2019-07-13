@@ -37,6 +37,21 @@ namespace MyERPSecondDevTools.Model.Ext
         /// <summary>
         /// 方法参数
         /// </summary>
-        public List<string> argsParams { get; set; }
+        public List<string> JsArgsParams { get; set; }
+
+        /// <summary>
+        /// DLL路径
+        /// </summary>
+        public string CsDllPath { get; set; }
+
+        /// <summary>
+        /// 后台方法名
+        /// </summary>
+        public string CsMethodName { get; set; }
+
+        /// <summary>
+        /// 后台类名
+        /// </summary>
+        public string CsTypeName { get; set; }
     }
 }

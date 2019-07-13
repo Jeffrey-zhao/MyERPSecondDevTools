@@ -131,53 +131,56 @@ namespace MyERPSecondDevTools.Common
             {
                 foreach (var file in param)
                 {
-                    using (var module = ModuleDefinition.ReadModule(file.FullName))
+                    ReaderParameters parameters = new ReaderParameters
                     {
-                        MyERPBusinessAssemblyInfo assemblyInfo = new MyERPBusinessAssemblyInfo();
-                        assemblyInfo.AssemblyName = module.Name;
-                        assemblyInfo.AssemblyPath = module.FileName;
-                        var types = module.Types;
-                        foreach (var t in types)
+                        ReadingMode = ReadingMode.Deferred,
+                        ReadSymbols = false,
+                    };
+                    var module = ModuleDefinition.ReadModule(file.FullName, parameters);
+                    MyERPBusinessAssemblyInfo assemblyInfo = new MyERPBusinessAssemblyInfo();
+                    assemblyInfo.AssemblyName = module.Name;
+                    assemblyInfo.AssemblyPath = file.FullName;
+                    var types = module.Types;
+                    foreach (var t in types)
+                    {
+                        if (t.FullName.StartsWith("Mysoft"))
                         {
-                            if (t.FullName.StartsWith("Mysoft"))
+                            MyERPBusinessAssemblyTypeInfo typeInfo = new MyERPBusinessAssemblyTypeInfo();
+                            typeInfo.TypeName = t.Name;
+                            typeInfo.TypeFullName = t.FullName;
+
+                            var ms = t.Methods;
+                            var prs = t.Fields;
+                            foreach (var p in prs)
                             {
-                                MyERPBusinessAssemblyTypeInfo typeInfo = new MyERPBusinessAssemblyTypeInfo();
-                                typeInfo.TypeName = t.Name;
-                                typeInfo.TypeFullName = t.FullName;
-
-                                var ms = t.Methods;
-                                var prs = t.Fields;
-                                foreach (var p in prs)
-                                {
-                                    MyERPBusinessAssemblyFieldInfo fieldInfo = new MyERPBusinessAssemblyFieldInfo();
-                                    fieldInfo.FieldName = p.Name;
-                                    fieldInfo.FieldTypeName = p.FieldType.FullName;
-                                    typeInfo.Fields.Add(fieldInfo);
-                                }
-
-                                foreach (var method in ms)
-                                {
-                                    if (method.Name != ".ctor")
-                                    {
-                                        MyERPBusinessAssemblyMethodInfo methodInfo = new MyERPBusinessAssemblyMethodInfo();
-                                        methodInfo.MethodName = method.Name;
-
-                                        var ps = method.Parameters;
-                                        foreach (var p in ps)
-                                        {
-                                            MyERPBusinessAssemblyMethodParamInfo paramInfo = new MyERPBusinessAssemblyMethodParamInfo();
-                                            paramInfo.ParameterName = p.Name;
-                                            paramInfo.ParameterType = p.ParameterType.FullName;
-                                            methodInfo.Paramters.Add(paramInfo);
-                                        }
-                                        typeInfo.Methods.Add(methodInfo);
-                                    }
-                                }
-                                assemblyInfo.Types.Add(typeInfo);
+                                MyERPBusinessAssemblyFieldInfo fieldInfo = new MyERPBusinessAssemblyFieldInfo();
+                                fieldInfo.FieldName = p.Name;
+                                fieldInfo.FieldTypeName = p.FieldType.FullName;
+                                typeInfo.Fields.Add(fieldInfo);
                             }
+
+                            foreach (var method in ms)
+                            {
+                                if (method.Name != ".ctor")
+                                {
+                                    MyERPBusinessAssemblyMethodInfo methodInfo = new MyERPBusinessAssemblyMethodInfo();
+                                    methodInfo.MethodName = method.Name;
+
+                                    var ps = method.Parameters;
+                                    foreach (var p in ps)
+                                    {
+                                        MyERPBusinessAssemblyMethodParamInfo paramInfo = new MyERPBusinessAssemblyMethodParamInfo();
+                                        paramInfo.ParameterName = p.Name;
+                                        paramInfo.ParameterType = p.ParameterType.FullName;
+                                        methodInfo.Paramters.Add(paramInfo);
+                                    }
+                                    typeInfo.Methods.Add(methodInfo);
+                                }
+                            }
+                            assemblyInfo.Types.Add(typeInfo);
                         }
-                        GlobalData.MyERPBusinessAssemblyInfos.Add(assemblyInfo);
                     }
+                    GlobalData.MyERPBusinessAssemblyInfos.Add(assemblyInfo);
                 }
             };
             
@@ -200,6 +203,21 @@ namespace MyERPSecondDevTools.Common
                     ActionBody(currentList);
                 });
             }
+        }
+
+        /// <summary>
+        /// 判断程序集是否已经全部加载完毕
+        /// </summary>
+        /// <returns></returns>
+        public static bool IsInitAssemblySuccess()
+        {
+            DirectoryInfo directoryInfo = new DirectoryInfo(GlobalData.ERPPath + "/bin");
+            var files = directoryInfo.GetFiles("*.dll").ToList().FindAll(p => p.Name.StartsWith("Mysoft") && !p.Name.StartsWith("Mysoft.Map"));
+            var totalCount = files.Count;
+            if (GlobalData.MyERPBusinessAssemblyInfos.Count == totalCount)
+                return true;
+            else
+                return false;
         }
     }
 }

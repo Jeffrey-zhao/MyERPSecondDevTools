@@ -69,17 +69,37 @@
     <Reference Include="HtmlAgilityPack, Version=1.11.8.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.8\lib\Net45\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.dll</HintPath>
+    <Reference Include="ICSharpCode.AvalonEdit">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.AvalonEdit.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    <Reference Include="ICSharpCode.Decompiler">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.Decompiler.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.NRefactory">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.NRefactory.CSharp">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.CSharp.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.NRefactory.VB">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.VB.dll</HintPath>
+    </Reference>
+    <Reference Include="ICSharpCode.TreeView">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.TreeView.dll</HintPath>
+    </Reference>
+    <Reference Include="ILSpy">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.exe</HintPath>
+    </Reference>
+    <Reference Include="ILSpy.SharpDevelop.LGPL">
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.SharpDevelop.LGPL.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.dll</HintPath>
     </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
-    </Reference>
-    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.Pdb.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -161,6 +181,10 @@
     </BootstrapperPackage>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler.csproj">
+      <Project>{e801b965-400f-4e40-a04e-9eeb5775481e}</Project>
+      <Name>MyERPSecondDevTools.Decompiler</Name>
+    </ProjectReference>
     <ProjectReference Include="..\MyERPSecondDevTools.Model\MyERPSecondDevTools.Model.csproj">
       <Project>{31813467-9B17-45A2-8926-86B263709075}</Project>
       <Name>MyERPSecondDevTools.Model</Name>
@@ -169,6 +193,8 @@
   <ItemGroup>
     <None Include="icons\search.png" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <None Include="AppData\options.json" />
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

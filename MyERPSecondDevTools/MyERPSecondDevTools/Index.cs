@@ -1,4 +1,5 @@
 ﻿using MyERPSecondDevTools.Common;
+using MyERPSecondDevTools.Decompiler;
 using MyERPSecondDevTools.Model.Ext;
 using MyERPSecondDevTools.Model.Model;
 using Newtonsoft.Json;
@@ -64,7 +65,7 @@ namespace MyERPSecondDevTools
         /// <summary>
         /// 后台程序集信息
         /// </summary>
-        private List<MyERPBusinessAssemblyTypeInfo> MyERPBusinessAssemblyTypeInfos { get; set; }
+        private List<MyERPBusinessAssemblyInfo> MyERPBusinessAssemblyInfos { get; set; }
         #endregion
 
 
@@ -205,6 +206,16 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void button_fiddler_Click(object sender, EventArgs e)
         {
+            if (!FolderHelper.IsInitAssemblySuccess())
+            {
+                MessageBox.Show("程序集信息还未加载完成，请稍后再试");
+                return;
+            }
+            else
+            {
+                MyERPBusinessAssemblyInfos = GlobalData.MyERPBusinessAssemblyInfos.ToList();
+            }
+
             if (toolErpPathLabel.Text == "")
             {
                 MessageBox.Show("请设置ERP站点路径");
@@ -526,7 +537,7 @@ namespace MyERPSecondDevTools
                         subNode.JsModuleName = moduleAllFunctions.moduleName;
                         subNode.JsFunctionName = item.name;
                         subNode.JsFunctionNameValue = item.name;
-                        subNode.argsParams = item.argsParams;
+                        subNode.JsArgsParams = item.argsParams;
                         subNode.GlobalType = "front";
                         subNode.ContextMenuStrip = contextMenuStrip;
                         tn.Nodes.Add(subNode);
@@ -606,7 +617,38 @@ namespace MyERPSecondDevTools
             {
                 if (selectNode.Type == "appServiceEvent")
                 {
-
+                    var jsSourceData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
+                    if (jsSourceData != null)
+                    {
+                        richTextBox1.Text = "//代码文件路径:" + jsSourceData.JsLocalPath + "\n" + jsSourceData.JsSourceCode;
+                    }
+                    else
+                        richTextBox1.Text = "未找到对应源码，请手动查找！";
+                }
+                else if (selectNode.Type == "backMethod")
+                {
+                    try
+                    {
+                        richTextBox1.Text = "正在反编译源代码，请稍后。。。";
+                        MyERPBusinessAssemblyInfo assemblyInfo = null;
+                        foreach (var assembly in MyERPBusinessAssemblyInfos)
+                        {
+                            var searchType = assembly.Types.FirstOrDefault(p => p.TypeFullName == selectNode.CsTypeName);
+                            if (searchType != null)
+                            {
+                                assemblyInfo = assembly;
+                                break;
+                            }
+                        }
+                        if (assemblyInfo == null)
+                            return;
+                        var textOutPut = DecompilerHelper.GetDecompilerTypeInfo(GlobalData.ERPPath + @"\bin", assemblyInfo.AssemblyPath, selectNode.CsTypeName);
+                        richTextBox1.Text = textOutPut.b.ToString();
+                    }
+                    catch (Exception)
+                    {
+                        richTextBox1.Text = "反编译出现错误，请重试！";
+                    }
                 }
             }
 
@@ -728,7 +770,7 @@ namespace MyERPSecondDevTools
             var isExists = false;
             foreach (TreeNodeExt node in selectNode.Nodes)
             {
-                if (node.Type == "backMethod")
+                if (node.Type == "backType" || node.Type == "backMethod")
                 {
                     isExists = true;
                     break;
@@ -737,38 +779,46 @@ namespace MyERPSecondDevTools
 
             if (!isExists)
             {
-                var assemblyList = GlobalData.MyERPBusinessAssemblyInfos.ToList().Aggregate(Enumerable.Empty<MyERPBusinessAssemblyTypeInfo>(), (total, next) =>
+                var assemblyList = MyERPBusinessAssemblyInfos.Aggregate(Enumerable.Empty<MyERPBusinessAssemblyTypeInfo>(), (total, next) =>
                 {
                     return total.Union(next.Types);
                 });
                 var type = assemblyList.FirstOrDefault(p => p.TypeFullName == selectNode.JsModuleName);
                 if (type != null)
                 {
-                    TreeNodeExt node = new TreeNodeExt { Text = "后台方法", Type = "backMethod" };
+                    TreeNodeExt node = new TreeNodeExt { Text = "后台方法", Type = "backType" };
                     type.Methods.ForEach(m =>
                     {
-                        var showMethodName = string.Empty;
-                        if (m.Paramters.Count > 0)
+                        if (m.MethodName == selectNode.JsFunctionName)
                         {
-                            var sb = new StringBuilder();
-                            foreach (var item in m.Paramters)
+                            var showMethodName = string.Empty;
+                            if (m.Paramters.Count > 0)
                             {
-                                sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
+                                var sb = new StringBuilder();
+                                foreach (var item in m.Paramters)
+                                {
+                                    sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
+                                }
+                                var tempStr = sb.ToString().TrimEnd(',');
+                                showMethodName = type.TypeName + "." + m.MethodName + "(" + tempStr + ")";
                             }
-                            var tempStr = sb.ToString().TrimEnd(',');
-                            showMethodName = type.TypeName + "." + m.MethodName + "(" + tempStr + ")";
-                        }
-                        else
-                        {
-                            showMethodName = type.TypeName + "." + m.MethodName;
-                        }
-                        TreeNodeExt subnode = new TreeNodeExt
-                        {
-                            Text = showMethodName,
-                            ContextMenuStrip = contextMenuStrip
-                        };
+                            else
+                            {
+                                showMethodName = type.TypeName + "." + m.MethodName;
+                            }
+                            TreeNodeExt subnode = new TreeNodeExt
+                            {
+                                Text = showMethodName,
+                                CsMethodName = m.MethodName,
+                                CsTypeName = type.TypeFullName,
+                                Tag = type.TypeFullName + "." + m.MethodName,
+                                Type = "backMethod",
+                                GlobalType = "back",
+                                ContextMenuStrip = contextMenuStrip
+                            };
 
-                        node.Nodes.Add(subnode);
+                            node.Nodes.Add(subnode);
+                        }
                     });
 
                     selectNode.Nodes.Add(node);
