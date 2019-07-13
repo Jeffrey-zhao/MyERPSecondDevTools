@@ -44,11 +44,16 @@
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
             this.timer_GetResponse = new System.Windows.Forms.Timer(this.components);
+            this.contextMenuStrip = new System.Windows.Forms.ContextMenuStrip(this.components);
+            this.item_before = new System.Windows.Forms.ToolStripMenuItem();
+            this.item_after = new System.Windows.Forms.ToolStripMenuItem();
+            this.item_override = new System.Windows.Forms.ToolStripMenuItem();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
             this.tabPage1.SuspendLayout();
             this.tabPage2.SuspendLayout();
+            this.contextMenuStrip.SuspendLayout();
             this.SuspendLayout();
             // 
             // toolStrip1
@@ -147,10 +152,10 @@
             | System.Windows.Forms.AnchorStyles.Left) 
             | System.Windows.Forms.AnchorStyles.Right)));
             this.richTextBox1.HideSelection = false;
-            this.richTextBox1.Location = new System.Drawing.Point(469, 3);
+            this.richTextBox1.Location = new System.Drawing.Point(605, 3);
             this.richTextBox1.Name = "richTextBox1";
             this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(1098, 914);
+            this.richTextBox1.Size = new System.Drawing.Size(962, 914);
             this.richTextBox1.TabIndex = 1;
             this.richTextBox1.Text = "";
             // 
@@ -161,7 +166,7 @@
             this.tv_code.FullRowSelect = true;
             this.tv_code.Location = new System.Drawing.Point(3, 3);
             this.tv_code.Name = "tv_code";
-            this.tv_code.Size = new System.Drawing.Size(466, 914);
+            this.tv_code.Size = new System.Drawing.Size(602, 914);
             this.tv_code.TabIndex = 0;
             this.tv_code.Click += new System.EventHandler(this.tv_code_Click);
             this.tv_code.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tv_code_MouseDown);
@@ -193,6 +198,33 @@
             this.timer_GetResponse.Interval = 50;
             this.timer_GetResponse.Tick += new System.EventHandler(this.timer_GetResponse_Tick);
             // 
+            // contextMenuStrip
+            // 
+            this.contextMenuStrip.Items.AddRange(new System.Windows.Forms.ToolStripItem[] {
+            this.item_before,
+            this.item_after,
+            this.item_override});
+            this.contextMenuStrip.Name = "contextMenuStrip";
+            this.contextMenuStrip.Size = new System.Drawing.Size(128, 70);
+            // 
+            // item_before
+            // 
+            this.item_before.Name = "item_before";
+            this.item_before.Size = new System.Drawing.Size(127, 22);
+            this.item_before.Text = "Before";
+            // 
+            // item_after
+            // 
+            this.item_after.Name = "item_after";
+            this.item_after.Size = new System.Drawing.Size(127, 22);
+            this.item_after.Text = "After";
+            // 
+            // item_override
+            // 
+            this.item_override.Name = "item_override";
+            this.item_override.Size = new System.Drawing.Size(127, 22);
+            this.item_override.Text = "Override";
+            // 
             // MyERPSecondDevTools
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -213,6 +245,7 @@
             this.tabControl.ResumeLayout(false);
             this.tabPage1.ResumeLayout(false);
             this.tabPage2.ResumeLayout(false);
+            this.contextMenuStrip.ResumeLayout(false);
             this.ResumeLayout(false);
             this.PerformLayout();
 
@@ -233,6 +266,10 @@
         private System.Windows.Forms.WebBrowser webBrowser;
         private System.Windows.Forms.TreeView tv_code;
         private System.Windows.Forms.RichTextBox richTextBox1;
+        private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
+        private System.Windows.Forms.ToolStripMenuItem item_before;
+        private System.Windows.Forms.ToolStripMenuItem item_after;
+        private System.Windows.Forms.ToolStripMenuItem item_override;
     }
 }
 

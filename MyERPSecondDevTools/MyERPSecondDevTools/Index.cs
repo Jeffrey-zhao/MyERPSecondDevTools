@@ -60,6 +60,11 @@ namespace MyERPSecondDevTools
         /// JS模块所有方法数据
         /// </summary>
         private List<GetJsModuleAllFunctionResponse> JsModuleAllFunctionList { get; set; }
+
+        /// <summary>
+        /// 后台程序集信息
+        /// </summary>
+        private List<MyERPBusinessAssemblyTypeInfo> MyERPBusinessAssemblyTypeInfos { get; set; }
         #endregion
 
 
@@ -466,7 +471,8 @@ namespace MyERPSecondDevTools
                         {
                             Text = subItem.Title,
                             Tag = subItem.ControlId,
-                            Type = "point"
+                            Type = "point",
+                            GlobalType = "front"
                         };
 
                         foreach (var secItem in subItem.Events)
@@ -480,7 +486,9 @@ namespace MyERPSecondDevTools
                                 Tag = trimFunctionName,
                                 Type = "event",
                                 JsModuleName = jsModuleName,
-                                JsFunctionName = jsFunctionName
+                                JsFunctionName = jsFunctionName,
+                                GlobalType = "front",
+                                ContextMenuStrip = contextMenuStrip
                             };
                             jsFunctionName = jsFunctionName.Contains("(") ? jsFunctionName.Substring(0, jsFunctionName.IndexOf("(")) : jsFunctionName;
                             secTn.JsFunctionNameValue = jsFunctionName;
@@ -505,6 +513,7 @@ namespace MyERPSecondDevTools
                 tn.Text = m.JsModuleName;
                 tn.Type = "point";
                 tn.JsModuleName = m.JsModuleName;
+                tn.GlobalType = "front";
                 //记载模块下所有方法
                 var moduleAllFunctions = JsModuleAllFunctionList.FirstOrDefault(p => p.moduleName == m.JsModuleName);
                 if (moduleAllFunctions != null)
@@ -518,8 +527,10 @@ namespace MyERPSecondDevTools
                         subNode.JsFunctionName = item.name;
                         subNode.JsFunctionNameValue = item.name;
                         subNode.argsParams = item.argsParams;
+                        subNode.GlobalType = "front";
+                        subNode.ContextMenuStrip = contextMenuStrip;
                         tn.Nodes.Add(subNode);
-                    }    
+                    }
                 }
 
                 firstTn2.Nodes.Add(tn);
@@ -537,7 +548,7 @@ namespace MyERPSecondDevTools
             var jsonPostData2 = JsonConvert.SerializeObject(getJsAppServiceReferenceRequest);
             var responseData2 = ERPWebRequestHelper.PostWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "GetAppServicesFunction", jsonPostData2, Encoding.UTF8);
             JsAppServiceReferenceList = JsonConvert.DeserializeObject<List<GetJsAppServiceReferenceResponse>>(responseData2);
-            
+
             #endregion
 
             tabControl.SelectedTab = tabPage2;
@@ -562,31 +573,46 @@ namespace MyERPSecondDevTools
         private void tv_code_Click(object sender, EventArgs e)
         {
             var selectNode = (TreeNodeExt)tv_code.SelectedNode;
-            if (selectNode.Type == "event" || selectNode.Type == "pluginEvent" || selectNode.Type == "appServiceEvent" || selectNode.Type == "allPoint")
+            if (selectNode.GlobalType == "front")
             {
-                var jsSourceData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
-                if (jsSourceData != null)
+                if (selectNode.Type == "event" || selectNode.Type == "pluginEvent" || selectNode.Type == "appServiceEvent" || selectNode.Type == "allPoint")
                 {
-                    richTextBox1.Text = "//代码文件路径:" + jsSourceData.JsLocalPath + "\n" + jsSourceData.JsSourceCode;
-                }
-                else
-                    richTextBox1.Text = "未找到对应源码，请手动查找！";
+                    var jsSourceData = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
+                    if (jsSourceData != null)
+                    {
+                        richTextBox1.Text = "//代码文件路径:" + jsSourceData.JsLocalPath + "\n" + jsSourceData.JsSourceCode;
+                    }
+                    else
+                        richTextBox1.Text = "未找到对应源码，请手动查找！";
 
-                if (selectNode.Type == "event" || selectNode.Type == "pluginEvent")
+                    if (selectNode.Type == "event" || selectNode.Type == "pluginEvent")
+                    {
+                        foreach (TreeNodeExt item in selectNode.Nodes)
+                        {
+                            InitAppService(item);
+                        }
+                    }
+                }
+                else if (selectNode.Type == "point")
                 {
                     foreach (TreeNodeExt item in selectNode.Nodes)
                     {
+                        InitPluginMethod(item);
                         InitAppService(item);
                     }
                 }
             }
-            else if (selectNode.Type == "point")
+            else
             {
-                foreach (TreeNodeExt item in selectNode.Nodes)
+                if (selectNode.Type == "appServiceEvent")
                 {
-                    InitPluginMethod(item);
-                    InitAppService(item);
+
                 }
+            }
+
+            foreach (TreeNodeExt item in selectNode.Nodes)
+            {
+                InitBackMethod(item);
             }
         }
 
@@ -623,7 +649,8 @@ namespace MyERPSecondDevTools
                                 JsModuleName = !selectNode.JsModuleName.Contains("Plugin") ? selectNode.JsModuleName + ".Plugin" : selectNode.JsModuleName, //扩展方法，定义到Plugin模块
                                 JsFunctionName = selectNode.JsFunctionName,
                                 JsFunctionNameValue = selectNode.JsFunctionNameValue,
-                                ToolTipText = goupData.JsPath
+                                ToolTipText = goupData.JsPath,
+                                GlobalType = "front"
                             };
                             selectNode.Nodes.Add(tn);
                         }
@@ -681,11 +708,70 @@ namespace MyERPSecondDevTools
                                 Type = "appServiceEvent",
                                 JsModuleName = item.appServiceName, //扩展方法，定义到Plugin模块
                                 JsFunctionName = item.functionName,
-                                JsFunctionNameValue = item.functionName
+                                JsFunctionNameValue = item.functionName,
+                                GlobalType = "back",
+                                ContextMenuStrip = contextMenuStrip
                             };
                             selectNode.Nodes.Add(tn);
                         }
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 加载后台AppService方法
+        /// </summary>
+        /// <param name="selectNode"></param>
+        private void InitBackMethod(TreeNodeExt selectNode)
+        {
+            var isExists = false;
+            foreach (TreeNodeExt node in selectNode.Nodes)
+            {
+                if (node.Type == "backMethod")
+                {
+                    isExists = true;
+                    break;
+                }
+            }
+
+            if (!isExists)
+            {
+                var assemblyList = GlobalData.MyERPBusinessAssemblyInfos.ToList().Aggregate(Enumerable.Empty<MyERPBusinessAssemblyTypeInfo>(), (total, next) =>
+                {
+                    return total.Union(next.Types);
+                });
+                var type = assemblyList.FirstOrDefault(p => p.TypeFullName == selectNode.JsModuleName);
+                if (type != null)
+                {
+                    TreeNodeExt node = new TreeNodeExt { Text = "后台方法", Type = "backMethod" };
+                    type.Methods.ForEach(m =>
+                    {
+                        var showMethodName = string.Empty;
+                        if (m.Paramters.Count > 0)
+                        {
+                            var sb = new StringBuilder();
+                            foreach (var item in m.Paramters)
+                            {
+                                sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
+                            }
+                            var tempStr = sb.ToString().TrimEnd(',');
+                            showMethodName = type.TypeName + "." + m.MethodName + "(" + tempStr + ")";
+                        }
+                        else
+                        {
+                            showMethodName = type.TypeName + "." + m.MethodName;
+                        }
+                        TreeNodeExt subnode = new TreeNodeExt
+                        {
+                            Text = showMethodName,
+                            ContextMenuStrip = contextMenuStrip
+                        };
+
+                        node.Nodes.Add(subnode);
+                    });
+
+                    selectNode.Nodes.Add(node);
                 }
             }
         }

@@ -10,6 +10,11 @@ namespace MyERPSecondDevTools.Model.Ext
     public class TreeNodeExt : TreeNode
     {
         /// <summary>
+        /// 大类（Front、Back）
+        /// </summary>
+        public string GlobalType { get; set; }
+
+        /// <summary>
         /// 节点类型
         /// </summary>
         public string Type { get; set; }

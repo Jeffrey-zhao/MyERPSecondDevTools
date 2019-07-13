@@ -52,6 +52,7 @@
     <Compile Include="Model\GetJsPluginFunctionRequest.cs" />
     <Compile Include="Model\GetJsPluginFunctionResponse.cs" />
     <Compile Include="Model\ModulePluginPointModel.cs" />
+    <Compile Include="Model\MyERPBusinessAssemblyInfo.cs" />
     <Compile Include="Model\MyERPBusinessJsModel.cs" />
     <Compile Include="Model\MyERPBusinessJsSyntaxTreeModel.cs" />
     <Compile Include="Model\MyERPBusJsAndTreeModel.cs" />

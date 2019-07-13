@@ -1,4 +1,6 @@
-﻿using System;
+﻿using MyERPSecondDevTools.Model.Model;
+using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.IO;
@@ -69,5 +71,10 @@ namespace MyERPSecondDevTools.Common
         /// ERP站点主机名
         /// </summary>
         public static string ERPHost { get; set; }
+
+        /// <summary>
+        /// 明源ERP程序集信息
+        /// </summary>
+        public static ConcurrentBag<MyERPBusinessAssemblyInfo> MyERPBusinessAssemblyInfos { get; set; }
     }
 }

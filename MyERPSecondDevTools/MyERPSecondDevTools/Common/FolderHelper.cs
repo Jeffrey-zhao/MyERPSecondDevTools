@@ -10,6 +10,10 @@ using System.Security.AccessControl;
 using System.Security.Permissions;
 using System.Windows.Forms;
 using System.Xml;
+using Mono.Cecil;
+using System.Diagnostics;
+using System.Threading.Tasks;
+using MyERPSecondDevTools.Model.Model;
 
 namespace MyERPSecondDevTools.Common
 {
@@ -71,6 +75,7 @@ namespace MyERPSecondDevTools.Common
 
             InitOALogin();
             InitPubInterface();
+            InitAssemblyInfo();
         }
 
         /// <summary>
@@ -101,10 +106,99 @@ namespace MyERPSecondDevTools.Common
         {
             SqlHelper sqlHelper = new SqlHelper(GlobalData.ERPSQLConnectionString);
             var pubData = sqlHelper.ExecuteReader("SELECT TOP 1 AppId, AppKey FROM myOpenApiIdentity WHERE IsSystem = 1");
-            if(pubData != null && pubData.Count > 0)
+            if (pubData != null && pubData.Count > 0)
             {
                 GlobalData.ERPPubAppId = pubData[0]["AppId"];
                 GlobalData.ERPPubAppKey = pubData[0]["AppKey"];
+            }
+        }
+
+        /// <summary>
+        /// 初始化程序集信息
+        /// </summary>
+        private static void InitAssemblyInfo()
+        {
+            GlobalData.MyERPBusinessAssemblyInfos = new System.Collections.Concurrent.ConcurrentBag<MyERPBusinessAssemblyInfo>();
+            DirectoryInfo directoryInfo = new DirectoryInfo(GlobalData.ERPPath + "/bin");
+            var files = directoryInfo.GetFiles("*.dll").ToList().FindAll(p => p.Name.StartsWith("Mysoft") && !p.Name.StartsWith("Mysoft.Map"));
+            var totalCount = files.Count;
+            //获取JS源码任务四等分，除不尽五等分，并行执行
+            var factorNum = totalCount / 4;
+            var currentNum = 0;
+
+            //任务主体方法
+            Action<IEnumerable<FileInfo>> ActionBody = param =>
+            {
+                foreach (var file in param)
+                {
+                    using (var module = ModuleDefinition.ReadModule(file.FullName))
+                    {
+                        MyERPBusinessAssemblyInfo assemblyInfo = new MyERPBusinessAssemblyInfo();
+                        assemblyInfo.AssemblyName = module.Name;
+                        assemblyInfo.AssemblyPath = module.FileName;
+                        var types = module.Types;
+                        foreach (var t in types)
+                        {
+                            if (t.FullName.StartsWith("Mysoft"))
+                            {
+                                MyERPBusinessAssemblyTypeInfo typeInfo = new MyERPBusinessAssemblyTypeInfo();
+                                typeInfo.TypeName = t.Name;
+                                typeInfo.TypeFullName = t.FullName;
+
+                                var ms = t.Methods;
+                                var prs = t.Fields;
+                                foreach (var p in prs)
+                                {
+                                    MyERPBusinessAssemblyFieldInfo fieldInfo = new MyERPBusinessAssemblyFieldInfo();
+                                    fieldInfo.FieldName = p.Name;
+                                    fieldInfo.FieldTypeName = p.FieldType.FullName;
+                                    typeInfo.Fields.Add(fieldInfo);
+                                }
+
+                                foreach (var method in ms)
+                                {
+                                    if (method.Name != ".ctor")
+                                    {
+                                        MyERPBusinessAssemblyMethodInfo methodInfo = new MyERPBusinessAssemblyMethodInfo();
+                                        methodInfo.MethodName = method.Name;
+
+                                        var ps = method.Parameters;
+                                        foreach (var p in ps)
+                                        {
+                                            MyERPBusinessAssemblyMethodParamInfo paramInfo = new MyERPBusinessAssemblyMethodParamInfo();
+                                            paramInfo.ParameterName = p.Name;
+                                            paramInfo.ParameterType = p.ParameterType.FullName;
+                                            methodInfo.Paramters.Add(paramInfo);
+                                        }
+                                        typeInfo.Methods.Add(methodInfo);
+                                    }
+                                }
+                                assemblyInfo.Types.Add(typeInfo);
+                            }
+                        }
+                        GlobalData.MyERPBusinessAssemblyInfos.Add(assemblyInfo);
+                    }
+                }
+            };
+            
+            for (int i = 0; i < 4; i++)
+            {
+                var currentList = files.Skip(currentNum * factorNum).Take(factorNum);
+                Task.Factory.StartNew(() =>
+                {
+                    ActionBody(currentList);
+                });
+                currentNum++;
+            }
+            
+            var remainder = totalCount % 4;
+            if (remainder > 0)
+            {
+                var currentList = files.Skip(currentNum * factorNum).Take(remainder);
+                Task.Factory.StartNew(() =>
+                {
+                    ActionBody(currentList);
+                });
             }
         }
     }
