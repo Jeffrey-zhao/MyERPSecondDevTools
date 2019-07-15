@@ -3,7 +3,6 @@ G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecond
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\MyERPSecondDevTools.Decompiler.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.Decompiler.dll
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.exe
-G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.dll
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Newtonsoft.Json.dll
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.dll
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.CSharp.dll
@@ -26,9 +25,10 @@ G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecond
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.TreeView.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.SharpDevelop.LGPL.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.VB.pdb
-G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.Pdb.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\obj\Debug\MyERPSecondDevTools.Decompiler.csprojAssemblyReference.cache
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\obj\Debug\MyERPSecondDevTools.Decompiler.csproj.CoreCompileInputs.cache
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\obj\Debug\MyERPSecondDevTools.Decompiler.csproj.CopyComplete
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\obj\Debug\MyERPSecondDevTools.Decompiler.exe
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\obj\Debug\MyERPSecondDevTools.Decompiler.pdb
+G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.Mdb.dll
+G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.Rocks.dll

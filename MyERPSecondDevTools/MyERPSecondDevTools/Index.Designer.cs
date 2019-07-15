@@ -39,7 +39,6 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.tabPage2 = new System.Windows.Forms.TabPage();
-            this.richTextBox1 = new System.Windows.Forms.RichTextBox();
             this.tv_code = new System.Windows.Forms.TreeView();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
@@ -48,6 +47,7 @@
             this.item_before = new System.Windows.Forms.ToolStripMenuItem();
             this.item_after = new System.Windows.Forms.ToolStripMenuItem();
             this.item_override = new System.Windows.Forms.ToolStripMenuItem();
+            this.txt_CodeView = new ICSharpCode.TextEditor.TextEditorControl();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -136,7 +136,7 @@
             // 
             // tabPage2
             // 
-            this.tabPage2.Controls.Add(this.richTextBox1);
+            this.tabPage2.Controls.Add(this.txt_CodeView);
             this.tabPage2.Controls.Add(this.tv_code);
             this.tabPage2.Location = new System.Drawing.Point(4, 22);
             this.tabPage2.Name = "tabPage2";
@@ -146,23 +146,10 @@
             this.tabPage2.Text = "代码预览";
             this.tabPage2.UseVisualStyleBackColor = true;
             // 
-            // richTextBox1
-            // 
-            this.richTextBox1.Anchor = ((System.Windows.Forms.AnchorStyles)((((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Bottom) 
-            | System.Windows.Forms.AnchorStyles.Left) 
-            | System.Windows.Forms.AnchorStyles.Right)));
-            this.richTextBox1.HideSelection = false;
-            this.richTextBox1.Location = new System.Drawing.Point(605, 3);
-            this.richTextBox1.Name = "richTextBox1";
-            this.richTextBox1.ReadOnly = true;
-            this.richTextBox1.Size = new System.Drawing.Size(962, 914);
-            this.richTextBox1.TabIndex = 1;
-            this.richTextBox1.Text = "";
-            // 
             // tv_code
             // 
             this.tv_code.Dock = System.Windows.Forms.DockStyle.Left;
-            this.tv_code.Font = new System.Drawing.Font("宋体", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(134)));
+            this.tv_code.Font = new System.Drawing.Font("Courier New", 10.5F, System.Drawing.FontStyle.Regular, System.Drawing.GraphicsUnit.Point, ((byte)(0)));
             this.tv_code.FullRowSelect = true;
             this.tv_code.Location = new System.Drawing.Point(3, 3);
             this.tv_code.Name = "tv_code";
@@ -225,6 +212,16 @@
             this.item_override.Size = new System.Drawing.Size(127, 22);
             this.item_override.Text = "Override";
             // 
+            // txt_CodeView
+            // 
+            this.txt_CodeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txt_CodeView.IsReadOnly = false;
+            this.txt_CodeView.Location = new System.Drawing.Point(605, 3);
+            this.txt_CodeView.Name = "txt_CodeView";
+            this.txt_CodeView.ShowVRuler = false;
+            this.txt_CodeView.Size = new System.Drawing.Size(962, 914);
+            this.txt_CodeView.TabIndex = 1;
+            // 
             // MyERPSecondDevTools
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
@@ -265,11 +262,11 @@
         private System.Windows.Forms.TabPage tabPage2;
         private System.Windows.Forms.WebBrowser webBrowser;
         private System.Windows.Forms.TreeView tv_code;
-        private System.Windows.Forms.RichTextBox richTextBox1;
         private System.Windows.Forms.ContextMenuStrip contextMenuStrip;
         private System.Windows.Forms.ToolStripMenuItem item_before;
         private System.Windows.Forms.ToolStripMenuItem item_after;
         private System.Windows.Forms.ToolStripMenuItem item_override;
+        private ICSharpCode.TextEditor.TextEditorControl txt_CodeView;
     }
 }
 

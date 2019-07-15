@@ -14,6 +14,7 @@ using Mono.Cecil;
 using System.Diagnostics;
 using System.Threading.Tasks;
 using MyERPSecondDevTools.Model.Model;
+using System.Text.RegularExpressions;
 
 namespace MyERPSecondDevTools.Common
 {
@@ -125,7 +126,7 @@ namespace MyERPSecondDevTools.Common
             //获取JS源码任务四等分，除不尽五等分，并行执行
             var factorNum = totalCount / 4;
             var currentNum = 0;
-
+            
             //任务主体方法
             Action<IEnumerable<FileInfo>> ActionBody = param =>
             {
@@ -161,7 +162,7 @@ namespace MyERPSecondDevTools.Common
 
                             foreach (var method in ms)
                             {
-                                if (method.Name != ".ctor")
+                                if (method.Name != ".ctor" && method.IsVirtual)
                                 {
                                     MyERPBusinessAssemblyMethodInfo methodInfo = new MyERPBusinessAssemblyMethodInfo();
                                     methodInfo.MethodName = method.Name;
@@ -181,6 +182,7 @@ namespace MyERPSecondDevTools.Common
                         }
                     }
                     GlobalData.MyERPBusinessAssemblyInfos.Add(assemblyInfo);
+                    module = null;
                 }
             };
             

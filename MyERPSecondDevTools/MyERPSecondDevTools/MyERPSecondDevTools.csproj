@@ -42,6 +42,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <Prefer32Bit>false</Prefer32Bit>
+    <UseVSHostingProcess>true</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -84,6 +85,9 @@
     <Reference Include="ICSharpCode.NRefactory.VB">
       <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.VB.dll</HintPath>
     </Reference>
+    <Reference Include="ICSharpCode.TextEditor">
+      <HintPath>F:\SharpDevelop_5.1.0.5216_Source\src\AddIns\Misc\PackageManagement\Packages\ICSharpCode.TextEditor\lib\Net20\ICSharpCode.TextEditor.dll</HintPath>
+    </Reference>
     <Reference Include="ICSharpCode.TreeView">
       <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.TreeView.dll</HintPath>
     </Reference>
@@ -93,13 +97,18 @@
     <Reference Include="ILSpy.SharpDevelop.LGPL">
       <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.SharpDevelop.LGPL.dll</HintPath>
     </Reference>
-    <Reference Include="Mono.Cecil, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+    <Reference Include="Mono.Cecil, Version=0.9.5.0, Culture=neutral, PublicKeyToken=0738eb9f132ed756, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.dll</HintPath>
     </Reference>
+    <Reference Include="Mono.Cecil.Mdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Mdb.dll</HintPath>
+    </Reference>
     <Reference Include="Mono.Cecil.Pdb, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.Pdb.dll</HintPath>
+      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Pdb.dll</HintPath>
+    </Reference>
+    <Reference Include="Mono.Cecil.Rocks, Version=0.10.4.0, Culture=neutral, PublicKeyToken=50cebf1cceb9d05e, processorArchitecture=MSIL">
+      <HintPath>..\packages\Mono.Cecil.0.10.4\lib\net40\Mono.Cecil.Rocks.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -195,6 +204,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="AppData\options.json" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="icons\index.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
