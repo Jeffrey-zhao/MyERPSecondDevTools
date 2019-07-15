@@ -66,6 +66,9 @@
   <PropertyGroup>
     <SignManifests>true</SignManifests>
   </PropertyGroup>
+  <PropertyGroup>
+    <ApplicationIcon>index.ico</ApplicationIcon>
+  </PropertyGroup>
   <ItemGroup>
     <Reference Include="HtmlAgilityPack, Version=1.11.8.0, Culture=neutral, PublicKeyToken=bd319b19eaf3b43a, processorArchitecture=MSIL">
       <HintPath>..\packages\HtmlAgilityPack.1.11.8\lib\Net45\HtmlAgilityPack.dll</HintPath>
@@ -207,6 +210,9 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="icons\index.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="index.ico" />
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>

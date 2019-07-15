@@ -487,15 +487,18 @@ namespace MyERPSecondDevTools
                             var trimFunctionName = secItem.FunctionName.TrimEnd(';');
                             var jsModuleName = trimFunctionName.Substring(0, trimFunctionName.LastIndexOf('.'));
                             var jsFunctionName = trimFunctionName.Substring(trimFunctionName.LastIndexOf('.') + 1);
+                            var jsFunctionInfo = GetJsFunctionNameInfo(jsFunctionName);
                             TreeNodeExt secTn = new TreeNodeExt
                             {
                                 Text = trimFunctionName,
                                 Tag = trimFunctionName,
                                 Type = "event",
                                 JsModuleName = jsModuleName,
-                                JsFunctionName = jsFunctionName,
+                                JsFunctionName = jsFunctionInfo.Item1,
+                                JsFunctionNameValue = jsFunctionInfo.Item1,
                                 GlobalType = "front",
-                                ContextMenuStrip = contextMenuStrip
+                                ContextMenuStrip = contextMenuStrip,
+                                JsArgsParams = jsFunctionInfo.Item2
                             };
                             jsFunctionName = jsFunctionName.Contains("(") ? jsFunctionName.Substring(0, jsFunctionName.IndexOf("(")) : jsFunctionName;
                             secTn.JsFunctionNameValue = jsFunctionName;
