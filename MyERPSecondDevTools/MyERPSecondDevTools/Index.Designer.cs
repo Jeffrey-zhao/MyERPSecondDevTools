@@ -39,6 +39,7 @@
             this.tabPage1 = new System.Windows.Forms.TabPage();
             this.webBrowser = new System.Windows.Forms.WebBrowser();
             this.tabPage2 = new System.Windows.Forms.TabPage();
+            this.txt_CodeView = new ICSharpCode.TextEditor.TextEditorControl();
             this.tv_code = new System.Windows.Forms.TreeView();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
@@ -47,7 +48,6 @@
             this.item_before = new System.Windows.Forms.ToolStripMenuItem();
             this.item_after = new System.Windows.Forms.ToolStripMenuItem();
             this.item_override = new System.Windows.Forms.ToolStripMenuItem();
-            this.txt_CodeView = new ICSharpCode.TextEditor.TextEditorControl();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -122,7 +122,7 @@
             this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage1.Size = new System.Drawing.Size(1570, 920);
             this.tabPage1.TabIndex = 0;
-            this.tabPage1.Text = "界面预览";
+            this.tabPage1.Text = "页面预览";
             this.tabPage1.UseVisualStyleBackColor = true;
             // 
             // webBrowser
@@ -143,8 +143,18 @@
             this.tabPage2.Padding = new System.Windows.Forms.Padding(3);
             this.tabPage2.Size = new System.Drawing.Size(1570, 920);
             this.tabPage2.TabIndex = 1;
-            this.tabPage2.Text = "代码预览";
+            this.tabPage2.Text = "页面引用";
             this.tabPage2.UseVisualStyleBackColor = true;
+            // 
+            // txt_CodeView
+            // 
+            this.txt_CodeView.Dock = System.Windows.Forms.DockStyle.Fill;
+            this.txt_CodeView.IsReadOnly = false;
+            this.txt_CodeView.Location = new System.Drawing.Point(605, 3);
+            this.txt_CodeView.Name = "txt_CodeView";
+            this.txt_CodeView.ShowVRuler = false;
+            this.txt_CodeView.Size = new System.Drawing.Size(962, 914);
+            this.txt_CodeView.TabIndex = 1;
             // 
             // tv_code
             // 
@@ -192,35 +202,25 @@
             this.item_after,
             this.item_override});
             this.contextMenuStrip.Name = "contextMenuStrip";
-            this.contextMenuStrip.Size = new System.Drawing.Size(128, 70);
+            this.contextMenuStrip.Size = new System.Drawing.Size(181, 92);
             // 
             // item_before
             // 
             this.item_before.Name = "item_before";
-            this.item_before.Size = new System.Drawing.Size(127, 22);
+            this.item_before.Size = new System.Drawing.Size(180, 22);
             this.item_before.Text = "Before";
             // 
             // item_after
             // 
             this.item_after.Name = "item_after";
-            this.item_after.Size = new System.Drawing.Size(127, 22);
+            this.item_after.Size = new System.Drawing.Size(180, 22);
             this.item_after.Text = "After";
             // 
             // item_override
             // 
             this.item_override.Name = "item_override";
-            this.item_override.Size = new System.Drawing.Size(127, 22);
+            this.item_override.Size = new System.Drawing.Size(180, 22);
             this.item_override.Text = "Override";
-            // 
-            // txt_CodeView
-            // 
-            this.txt_CodeView.Dock = System.Windows.Forms.DockStyle.Fill;
-            this.txt_CodeView.IsReadOnly = false;
-            this.txt_CodeView.Location = new System.Drawing.Point(605, 3);
-            this.txt_CodeView.Name = "txt_CodeView";
-            this.txt_CodeView.ShowVRuler = false;
-            this.txt_CodeView.Size = new System.Drawing.Size(962, 914);
-            this.txt_CodeView.TabIndex = 1;
             // 
             // MyERPSecondDevTools
             // 

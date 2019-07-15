@@ -31,14 +31,14 @@ namespace MyERPSecondDevTools
         static void Application_ThreadException(object sender, System.Threading.ThreadExceptionEventArgs e)
         {
             string str = GetExceptionMsg(e.Exception, e.ToString());
-            //MessageBox.Show(str, "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(str, "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
 
         }
 
         static void CurrentDomain_UnhandledException(object sender, UnhandledExceptionEventArgs e)
         {
             string str = GetExceptionMsg(e.ExceptionObject as Exception, e.ToString());
-            //MessageBox.Show(str, "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            MessageBox.Show(str, "系统错误", MessageBoxButtons.OK, MessageBoxIcon.Error);
         }
 
         /// <summary>

@@ -91,6 +91,9 @@ namespace MyERPSecondDevTools
             InitHistoryERPPath();
             InitTxtPageUrlPlaceHolder();
             txt_CodeView.IsReadOnly = true;
+            item_after.Click += Item_after_Click;
+            item_before.Click += Item_before_Click;
+            item_override.Click += Item_override_Click;
         }
         #endregion
 
@@ -1008,6 +1011,73 @@ namespace MyERPSecondDevTools
             }
 
             return new Tuple<string, List<string>>(jsFunctionName, null);
+        }
+        #endregion
+
+        #region 扩展操作功能
+        /// <summary>
+        /// 扩展模块方法或者后台方法
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void PluginModule(string type)
+        {
+            var selectNode = (TreeNodeExt)tv_code.SelectedNode;
+            if (selectNode.GlobalType == "front")
+            {
+                var moduleInfo = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
+                if (moduleInfo.JsModuleName.EndsWith(".Plugin") || moduleInfo.JsLocalPath.Contains("/Customize/"))
+                {
+                    MessageBox.Show("此模块为二开模块，不能扩展！");
+                    return;
+                }
+
+                var isExistsPlugin = false;
+                foreach (TreeNodeExt node in selectNode.Nodes)
+                {
+                    var pluginList = new List<string> { "after", "before", "override" };
+                    if (pluginList.Contains(node.Text))
+                    {
+                        isExistsPlugin = true;
+                        break;
+                    }
+                }
+                
+                if(!isExistsPlugin)
+                {
+                    
+                }
+            }
+        }
+
+        /// <summary>
+        /// Override点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Item_override_Click(object sender, EventArgs e)
+        {
+            PluginModule("override");
+        }
+
+        /// <summary>
+        /// Before点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Item_before_Click(object sender, EventArgs e)
+        {
+            PluginModule("before");
+        }
+
+        /// <summary>
+        /// After点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Item_after_Click(object sender, EventArgs e)
+        {
+            PluginModule("after");
         }
         #endregion
     }

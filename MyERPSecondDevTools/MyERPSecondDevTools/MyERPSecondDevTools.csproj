@@ -213,6 +213,8 @@
   </ItemGroup>
   <ItemGroup>
     <Content Include="index.ico" />
+    <Content Include="Template\PluginModuleTemplate.js" />
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
 </Project>
