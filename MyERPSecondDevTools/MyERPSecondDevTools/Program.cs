@@ -16,12 +16,12 @@ namespace MyERPSecondDevTools
         [STAThread]
         static void Main()
         {
-            //设置应用程序处理异常方式：ThreadException处理
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
-            //处理UI线程异常
-            Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
-            //处理非UI线程异常
-            AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
+            ////设置应用程序处理异常方式：ThreadException处理
+            //Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            ////处理UI线程异常
+            //Application.ThreadException += new System.Threading.ThreadExceptionEventHandler(Application_ThreadException);
+            ////处理非UI线程异常
+            //AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(CurrentDomain_UnhandledException);
 
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);

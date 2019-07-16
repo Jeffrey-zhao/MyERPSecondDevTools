@@ -15,6 +15,7 @@ using System.Diagnostics;
 using System.Threading.Tasks;
 using MyERPSecondDevTools.Model.Model;
 using System.Text.RegularExpressions;
+using MyERPSecondDevTools.Decompiler;
 
 namespace MyERPSecondDevTools.Common
 {
@@ -162,10 +163,13 @@ namespace MyERPSecondDevTools.Common
 
                             foreach (var method in ms)
                             {
-                                if (method.Name != ".ctor" && method.IsVirtual)
+                                if (method.Name != ".ctor")
                                 {
                                     MyERPBusinessAssemblyMethodInfo methodInfo = new MyERPBusinessAssemblyMethodInfo();
                                     methodInfo.MethodName = method.Name;
+                                    methodInfo.IsVirtual = method.IsVirtual;
+                                    methodInfo.IsPublic = method.IsPublic;
+                                    methodInfo.ReturnType = method.ReturnType.FullName;
 
                                     var ps = method.Parameters;
                                     foreach (var p in ps)

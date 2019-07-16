@@ -17,6 +17,7 @@ define("{{modulePluginName}}", function (require, exports, module, $product) {
     var ns = {
         /**Plugin模块中ns对象内不允许定义属性,避免和产品属性造成冲突**/
         /** 产品方法扩展区域**/
+		//{{functionName}}扩展
         __module_plugins__: {
             {{functionName}}:{
 				{{pluginType}}: function({{functionParams}}){

@@ -52,18 +52,26 @@ namespace MyERPSecondDevTools.Common
             //下载源码任务方法
             Func<IEnumerable<string>, List<MyERPBusinessJsModel>> downLoadBody = param =>
             {
-                WebClient webClient = new WebClient();
                 List<MyERPBusinessJsModel> models = new List<MyERPBusinessJsModel>();
-                foreach (var m in param)
+                try
                 {
-                    Uri uri = new Uri(m);
-                    var downLoadString = Encoding.UTF8.GetString(webClient.DownloadData(m));
-                    models.Add(new MyERPBusinessJsModel
+                    WebClient webClient = new WebClient();
+                    
+                    foreach (var m in param)
                     {
-                        ApplicationId = applicationId,
-                        JsName = m.Substring(0, m.IndexOf("?")),
-                        JsContent = downLoadString
-                    });
+                        Uri uri = new Uri(m);
+                        var downLoadString = Encoding.UTF8.GetString(webClient.DownloadData(m));
+                        models.Add(new MyERPBusinessJsModel
+                        {
+                            ApplicationId = applicationId,
+                            JsName = m.Substring(0, m.IndexOf("?")),
+                            JsContent = downLoadString
+                        });
+                    }
+                }
+                catch (Exception)
+                {
+                    
                 }
 
                 return models;
@@ -178,6 +186,8 @@ namespace MyERPSecondDevTools.Common
                 else if (functionName.Contains("_appTreeGrid") && name == "onload")
                     return "树网格加载事件";
                 else if (functionName.Contains("_appGrid") && name == "onload")
+                    return "网格加载事件";
+                else if (functionName.Contains("_appGrid") && functionName.Contains("_query"))
                     return "网格加载事件";
                 else
                     return functionName;

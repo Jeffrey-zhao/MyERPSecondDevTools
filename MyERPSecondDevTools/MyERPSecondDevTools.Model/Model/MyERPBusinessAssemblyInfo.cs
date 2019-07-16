@@ -20,10 +20,6 @@ namespace MyERPSecondDevTools.Model.Model
 
     public class MyERPBusinessAssemblyTypeInfo
     {
-        public string AssemblyPath { get; set; }
-
-        public string AssemblyName { get; set; }
-
         public string TypeName { get; set; }
 
         public string TypeFullName { get; set; }
@@ -43,6 +39,12 @@ namespace MyERPSecondDevTools.Model.Model
     public class MyERPBusinessAssemblyMethodInfo
     {
         public string MethodName { get; set; }
+
+        public bool IsVirtual { get; set; }
+
+        public bool IsPublic { get; set; }
+
+        public string ReturnType { get; set; }
 
         public List<MyERPBusinessAssemblyMethodParamInfo> Paramters { get; set; } = new List<MyERPBusinessAssemblyMethodParamInfo>();
     }

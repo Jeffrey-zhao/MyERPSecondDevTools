@@ -1,0 +1,8 @@
+﻿        /// <summary>
+        /// {{notes}}
+        /// </summary>
+{{notesParams}}{{notesReturnType}}        [PluginMethod(nameof({{methodFullName}}), PluginMode.{{pluginType}})]
+        public virtual {{pluginReturnType}} {{pluginMethodName}}({{methodParams}})
+        {
+            
+        }

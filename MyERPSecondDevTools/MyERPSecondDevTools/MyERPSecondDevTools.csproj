@@ -215,6 +215,7 @@
     <None Include="icons\复制.png" />
     <None Include="icons\生成目录.png" />
     <Content Include="index.ico" />
+    <Content Include="Template\CsharpPluginMethodTemplate.txt" />
     <Content Include="Template\PluginJsFunctionTemplate.js" />
     <Content Include="Template\PluginModuleTemplate.js" />
   </ItemGroup>

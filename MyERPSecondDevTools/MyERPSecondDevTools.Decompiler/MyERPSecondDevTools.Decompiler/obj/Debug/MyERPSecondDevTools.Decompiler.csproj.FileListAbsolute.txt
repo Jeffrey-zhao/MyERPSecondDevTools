@@ -14,7 +14,6 @@ G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecond
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.Decompiler.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ILSpy.exe.config
-G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Mono.Cecil.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\Newtonsoft.Json.xml
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.pdb
 G:\Work\极客大赛\明源ERP二开工具库Git\MyERPSecondDevTools\MyERPSecondDevTools.Decompiler\MyERPSecondDevTools.Decompiler\bin\Debug\ICSharpCode.NRefactory.xml

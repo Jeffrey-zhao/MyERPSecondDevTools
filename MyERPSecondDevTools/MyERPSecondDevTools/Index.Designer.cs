@@ -31,7 +31,11 @@
             this.components = new System.ComponentModel.Container();
             System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(MyERPSecondDevTools));
             this.toolStrip1 = new System.Windows.Forms.ToolStrip();
+            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
+            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
             this.toolErpPathLabel = new System.Windows.Forms.ToolStripLabel();
+            this.btn_Build = new System.Windows.Forms.ToolStripButton();
+            this.btn_Copy = new System.Windows.Forms.ToolStripButton();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.tabControl = new System.Windows.Forms.TabControl();
             this.tabPage1 = new System.Windows.Forms.TabPage();
@@ -46,10 +50,6 @@
             this.item_before = new System.Windows.Forms.ToolStripMenuItem();
             this.item_after = new System.Windows.Forms.ToolStripMenuItem();
             this.item_override = new System.Windows.Forms.ToolStripMenuItem();
-            this.tool_ButtonSetERPPath = new System.Windows.Forms.ToolStripButton();
-            this.toolStripHistory = new System.Windows.Forms.ToolStripDropDownButton();
-            this.btn_Copy = new System.Windows.Forms.ToolStripButton();
-            this.btn_Build = new System.Windows.Forms.ToolStripButton();
             this.toolStrip1.SuspendLayout();
             this.groupBox1.SuspendLayout();
             this.tabControl.SuspendLayout();
@@ -72,10 +72,47 @@
             this.toolStrip1.TabIndex = 0;
             this.toolStrip1.Text = "toolStrip1";
             // 
+            // tool_ButtonSetERPPath
+            // 
+            this.tool_ButtonSetERPPath.Image = global::MyERPSecondDevTools.Properties.Resources.数据目录;
+            this.tool_ButtonSetERPPath.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.tool_ButtonSetERPPath.Name = "tool_ButtonSetERPPath";
+            this.tool_ButtonSetERPPath.Size = new System.Drawing.Size(98, 22);
+            this.tool_ButtonSetERPPath.Text = "设置ERP路径";
+            this.tool_ButtonSetERPPath.Click += new System.EventHandler(this.toolSetERPPath_Click);
+            // 
+            // toolStripHistory
+            // 
+            this.toolStripHistory.Image = global::MyERPSecondDevTools.Properties.Resources.历史记录;
+            this.toolStripHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.toolStripHistory.Name = "toolStripHistory";
+            this.toolStripHistory.Size = new System.Drawing.Size(85, 22);
+            this.toolStripHistory.Text = "选择历史";
+            // 
             // toolErpPathLabel
             // 
             this.toolErpPathLabel.Name = "toolErpPathLabel";
             this.toolErpPathLabel.Size = new System.Drawing.Size(0, 22);
+            // 
+            // btn_Build
+            // 
+            this.btn_Build.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btn_Build.Image = global::MyERPSecondDevTools.Properties.Resources.生成目录;
+            this.btn_Build.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btn_Build.Name = "btn_Build";
+            this.btn_Build.Size = new System.Drawing.Size(88, 22);
+            this.btn_Build.Text = "生成到项目";
+            this.btn_Build.Click += new System.EventHandler(this.btn_Build_Click);
+            // 
+            // btn_Copy
+            // 
+            this.btn_Copy.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
+            this.btn_Copy.Image = global::MyERPSecondDevTools.Properties.Resources.复制;
+            this.btn_Copy.ImageTransparentColor = System.Drawing.Color.Magenta;
+            this.btn_Copy.Name = "btn_Copy";
+            this.btn_Copy.Size = new System.Drawing.Size(100, 22);
+            this.btn_Copy.Text = "复制到粘贴板";
+            this.btn_Copy.Click += new System.EventHandler(this.btn_Copy_Click);
             // 
             // groupBox1
             // 
@@ -175,7 +212,6 @@
             this.txt_pageUrl.Name = "txt_pageUrl";
             this.txt_pageUrl.Size = new System.Drawing.Size(1200, 21);
             this.txt_pageUrl.TabIndex = 1;
-            this.txt_pageUrl.Text = resources.GetString("txt_pageUrl.Text");
             // 
             // timer_GetResponse
             // 
@@ -208,43 +244,6 @@
             this.item_override.Name = "item_override";
             this.item_override.Size = new System.Drawing.Size(127, 22);
             this.item_override.Text = "Override";
-            // 
-            // tool_ButtonSetERPPath
-            // 
-            this.tool_ButtonSetERPPath.Image = global::MyERPSecondDevTools.Properties.Resources.数据目录;
-            this.tool_ButtonSetERPPath.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.tool_ButtonSetERPPath.Name = "tool_ButtonSetERPPath";
-            this.tool_ButtonSetERPPath.Size = new System.Drawing.Size(98, 22);
-            this.tool_ButtonSetERPPath.Text = "设置ERP路径";
-            this.tool_ButtonSetERPPath.Click += new System.EventHandler(this.toolSetERPPath_Click);
-            // 
-            // toolStripHistory
-            // 
-            this.toolStripHistory.Image = global::MyERPSecondDevTools.Properties.Resources.历史记录;
-            this.toolStripHistory.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.toolStripHistory.Name = "toolStripHistory";
-            this.toolStripHistory.Size = new System.Drawing.Size(85, 22);
-            this.toolStripHistory.Text = "选择历史";
-            // 
-            // btn_Copy
-            // 
-            this.btn_Copy.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.btn_Copy.Image = global::MyERPSecondDevTools.Properties.Resources.复制;
-            this.btn_Copy.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btn_Copy.Name = "btn_Copy";
-            this.btn_Copy.Size = new System.Drawing.Size(100, 22);
-            this.btn_Copy.Text = "复制到粘贴板";
-            this.btn_Copy.Click += new System.EventHandler(this.btn_Copy_Click);
-            // 
-            // btn_Build
-            // 
-            this.btn_Build.Alignment = System.Windows.Forms.ToolStripItemAlignment.Right;
-            this.btn_Build.Image = global::MyERPSecondDevTools.Properties.Resources.生成目录;
-            this.btn_Build.ImageTransparentColor = System.Drawing.Color.Magenta;
-            this.btn_Build.Name = "btn_Build";
-            this.btn_Build.Size = new System.Drawing.Size(88, 22);
-            this.btn_Build.Text = "生成到项目";
-            this.btn_Build.Click += new System.EventHandler(this.btn_Build_Click);
             // 
             // MyERPSecondDevTools
             // 

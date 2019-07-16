@@ -28,10 +28,15 @@ namespace MyERPSecondDevTools.Decompiler
             var types = module.Types;
             foreach (var t in types)
             {
-                if (t.FullName == "Mysoft.Cbxt.PayMng.AppServices.HtfkApplyAppService")
+                if (t.FullName == "Mysoft.Cbxt.PayMng.WorkFlow.HtfkApplyWfAppService")
                 {
                     language.DecompileType(t, textOutput, decompilationOptions);
                     Console.WriteLine(textOutput.b.ToString());
+                    var ms = t.Methods;
+                    foreach (var m in ms)
+                    {
+                        Console.WriteLine($"Name:{m.Name}; IsVirtual:{m.IsVirtual}; Public:{m.IsPublic}");
+                    }
                 }
             }
             Console.Read();

@@ -9,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -244,6 +245,8 @@ namespace MyERPSecondDevTools
                 return;
             }
 
+            button_fiddler.Enabled = false;
+
             var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
             webBrowser.Navigate(url);
             webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
@@ -277,7 +280,6 @@ namespace MyERPSecondDevTools
             timer_GetResponse.Stop();
             HtmlAgilityPack(MyERPResponseHtml);
         }
-
         #endregion
 
         #region 解析获取的ERP网页源码数据
@@ -593,6 +595,8 @@ namespace MyERPSecondDevTools
             {
                 return total.Union(next.Types);
             }).ToList();
+
+            button_fiddler.Enabled = true;
         }
 
         /// <summary>
@@ -1045,6 +1049,7 @@ namespace MyERPSecondDevTools
             var selectNode = (TreeNodeExt)tv_code.SelectedNode;
             if (selectNode.GlobalType == "front")
             {
+                #region 前端扩展
                 var moduleInfo = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
                 if (moduleInfo.JsModuleName.EndsWith(".Plugin") || moduleInfo.JsLocalPath.Contains("/Customize/"))
                 {
@@ -1087,7 +1092,6 @@ namespace MyERPSecondDevTools
                     paramSb.Append("$e");
                     templateText = templateText.Replace("{{functionParams}}", paramSb.ToString());
                     txt_CodeView.Text = templateText;
-
                 }
                 else
                 {
@@ -1174,6 +1178,62 @@ namespace MyERPSecondDevTools
 
                 btn_Build.Visible = true;
                 btn_Copy.Visible = true;
+                #endregion
+            }
+            else if (selectNode.GlobalType == "back")
+            {
+                #region 后端扩展
+                var typeInfo = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.TypeFullName == selectNode.CsTypeName);
+                if (typeInfo != null)
+                {
+                    var method = typeInfo.Methods.FirstOrDefault(p => p.MethodName == selectNode.CsMethodName);
+                    if(method != null)
+                    {
+                        if(!method.IsPublic)
+                            MessageBox.Show("此方法不是Public访问修饰，不能扩展！");
+                    }
+
+                    var pluginType = string.Empty;
+                    var returnType = string.Empty;
+                    var notesReturnType = string.Empty;
+                    switch (type)
+                    {
+                        case "before":
+                            pluginType = "Before";
+                            returnType = "void";
+                            break;
+                        case "after":
+                            pluginType = "After";
+                            returnType = "void";
+                            break;
+                        case "override":
+                            pluginType = "Override";
+                            returnType = DecompilerHelper.GetFieldTypeName(method.ReturnType);
+                            notesReturnType = "        /// <returns></returns>\r\n";
+                            break;
+                    }
+                    
+                    var templateText = File.ReadAllText("../../Template/CsharpPluginMethodTemplate.txt");
+                    templateText = templateText.Replace("{{methodFullName}}", selectNode.CsTypeName + "." + selectNode.CsMethodName);
+                    templateText = templateText.Replace("{{pluginType}}", pluginType);
+                    templateText = templateText.Replace("{{pluginReturnType}}", returnType);
+                    templateText = templateText.Replace("{{pluginMethodName}}", method.MethodName);
+                    templateText = templateText.Replace("{{notes}}", method.MethodName + "方法扩展");
+                    templateText = templateText.Replace("{{notesReturnType}}", notesReturnType);
+                    var paramSb = new StringBuilder();
+                    var notesParamSb = new StringBuilder();
+                    method.Paramters.ForEach(m =>
+                    {
+                        paramSb.Append(m.ParameterType + " " + m.ParameterName + ",");
+                        notesParamSb.AppendLine(string.Format(@"        /// <param name=""{0}""></param>", m.ParameterName));
+                    });
+                    templateText = templateText.Replace("{{notesParams}}", notesParamSb.ToString());
+                    templateText = templateText.Replace("{{methodParams}}", paramSb.ToString().TrimEnd(','));
+                    templateText = templateText.Replace(@"\r\n\r\n", @"\r\n");
+                    txt_CodeView.Text = templateText;
+                    btn_Copy.Visible = true;
+                }
+                #endregion
             }
         }
 
@@ -1217,12 +1277,12 @@ namespace MyERPSecondDevTools
             if (txt_CodeView.ActiveTextAreaControl.SelectionManager.SelectedText != "")
             {
                 Clipboard.SetText(txt_CodeView.ActiveTextAreaControl.SelectionManager.SelectedText);
-                MessageBox.Show("已复制所选内容，请粘贴到对应的JS扩展模块下");
+                MessageBox.Show("已复制所选内容");
             }
             else
             {
                 Clipboard.SetText(txt_CodeView.Text);
-                MessageBox.Show("已复制全部内容，请粘贴到对应的JS扩展模块下");
+                MessageBox.Show("已复制全部内容");
             }
         }
 
@@ -1233,7 +1293,42 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void btn_Build_Click(object sender, EventArgs e)
         {
+            var selectNode = (TreeNodeExt)tv_code.SelectedNode;
+            if (selectNode.GlobalType == "front")
+            {
+                DialogResult result = MessageBox.Show("确认生成到项目中吗？", "生成到项目中询问"
+                , MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+                if (result != DialogResult.OK)
+                {
+                    return;
+                }
+                var moduleInfo = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
+                var filePath = GlobalData.ERPPath+ @"\Customize\" + moduleInfo.JsLocalPath.Replace(GlobalData.ERPPath, string.Empty);
+                FileInfo fileInfo = new FileInfo(filePath);
+                if (!Directory.Exists(fileInfo.DirectoryName))
+                {
+                    Directory.CreateDirectory(fileInfo.DirectoryName);
+                }
+                File.WriteAllText(filePath, txt_CodeView.Text);
+                var erpPath = new DirectoryInfo(GlobalData.ERPPath);
+                var parentPath = erpPath.Parent;
+                var frontBuildFile = parentPath.GetFiles("前端编译.cmd");
+                if (frontBuildFile.Length > 0)
+                {
+                    //执行前端编译
+                    Process proc = new Process();
+                    string targetDir = string.Format(frontBuildFile[0].DirectoryName);
 
+                    proc.StartInfo.WorkingDirectory = targetDir;
+                    proc.StartInfo.FileName = frontBuildFile[0].Name;
+                    proc.StartInfo.Arguments = string.Format("10");
+
+                    proc.Start();
+                    proc.WaitForExit();
+                }
+
+                MessageBox.Show($"生成成功，生成的JS文件路径：{filePath}");
+            }
         }
         #endregion
     }
