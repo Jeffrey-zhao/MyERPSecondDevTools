@@ -212,7 +212,10 @@
     <None Include="icons\index.ico" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="icons\复制.png" />
+    <None Include="icons\生成目录.png" />
     <Content Include="index.ico" />
+    <Content Include="Template\PluginJsFunctionTemplate.js" />
     <Content Include="Template\PluginModuleTemplate.js" />
   </ItemGroup>
   <ItemGroup />

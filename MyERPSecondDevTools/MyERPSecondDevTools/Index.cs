@@ -94,6 +94,23 @@ namespace MyERPSecondDevTools
             item_after.Click += Item_after_Click;
             item_before.Click += Item_before_Click;
             item_override.Click += Item_override_Click;
+            btn_Build.Visible = false;
+            btn_Copy.Visible = false;
+        }
+
+        /// <summary>
+        /// 窗体关闭前确认
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MyERPSecondDevTools_FormClosing(object sender, FormClosingEventArgs e)
+        {
+            DialogResult result = MessageBox.Show("确认退出吗？", "退出询问"
+                , MessageBoxButtons.OKCancel, MessageBoxIcon.Question);
+            if (result != DialogResult.OK)
+            {
+                e.Cancel = true;//告诉窗体关闭这个任务取消
+            }
         }
         #endregion
 
@@ -596,6 +613,9 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void tv_code_Click(object sender, EventArgs e)
         {
+            btn_Build.Visible = false;
+            btn_Copy.Visible = false;
+
             var selectNode = (TreeNodeExt)tv_code.SelectedNode;
             if (selectNode.GlobalType == "front")
             {
@@ -940,18 +960,18 @@ namespace MyERPSecondDevTools
                                 sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
                             }
                             var tempStr = sb.ToString().TrimEnd(',');
-                            showMethodName = typeInfo.TypeName + "." + m.MethodName + "(" + tempStr + ")";
+                            showMethodName = m.MethodName + "(" + tempStr + ")";
                         }
                         else
                         {
-                            showMethodName = typeInfo.TypeName + "." + m.MethodName;
+                            showMethodName =m.MethodName;
                         }
                         TreeNodeExt subnode = new TreeNodeExt
                         {
                             Text = showMethodName,
                             CsMethodName = m.MethodName,
                             CsTypeName = typeInfo.TypeFullName,
-                            Tag = typeInfo.TypeFullName + "." + m.MethodName,
+                            Tag = m.MethodName,
                             Type = "backMethodReferenceMethod",
                             GlobalType = "back",
                             ContextMenuStrip = contextMenuStrip
@@ -1036,17 +1056,124 @@ namespace MyERPSecondDevTools
                 foreach (TreeNodeExt node in selectNode.Nodes)
                 {
                     var pluginList = new List<string> { "after", "before", "override" };
-                    if (pluginList.Contains(node.Text))
+                    if (type.Equals(node.Text))
                     {
                         isExistsPlugin = true;
                         break;
                     }
                 }
-                
-                if(!isExistsPlugin)
+                if (isExistsPlugin)
                 {
-                    
+                    MessageBox.Show($"{type}扩展已存在");
+                    return;
                 }
+
+                //查询扩展模块是否存在
+                var pluginModule = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName + ".Plugin");
+                if (pluginModule == null)
+                {
+                    var templateText = File.ReadAllText("../../Template/PluginModuleTemplate.js");
+                    templateText = templateText.Replace("{{modulePluginName}}", selectNode.JsModuleName + ".Plugin");
+                    templateText = templateText.Replace("{{functionName}}", selectNode.JsFunctionName);
+                    templateText = templateText.Replace("{{pluginType}}", type);
+                    var paramSb = new StringBuilder();
+                    selectNode.JsArgsParams.ForEach(m =>
+                    {
+                        if (m == "e")
+                            paramSb.Append("args, ");
+                        else
+                            paramSb.Append(m + ", ");
+                    });
+                    paramSb.Append("$e");
+                    templateText = templateText.Replace("{{functionParams}}", paramSb.ToString());
+                    txt_CodeView.Text = templateText;
+
+                }
+                else
+                {
+                    //查找__module_plugins__代码块的结束所在位置
+                    Func<string, Tuple<int, int>> GetModulePluginEndPosition = text =>
+                    {
+                        var resultPosition = 0;
+                        var resultPluginMethodEndPosition = 0;
+                        var pluginModulePosition = text.IndexOf("__module_plugins__");
+                        //先进后出集合
+                        Stack<int> startBraces = new Stack<int>();
+                        //记录扩展模块对应的大括号的集合个数
+                        var pluginStartListCount = 0;
+                        var charArray = text.ToCharArray();
+                        for (int i = 0; i < charArray.Length; i++)
+                        {
+                            //遇到大括号开头，加入集合
+                            if (charArray[i] == '{')
+                            {
+                                startBraces.Push(i);
+                                //已经找到扩展代码块的位置，跳出循环
+                                if (i > pluginModulePosition && pluginStartListCount == 0)
+                                {
+                                    pluginStartListCount = startBraces.Count;
+                                }
+                            }
+                            else if (charArray[i] == '}')
+                            {
+                                if (startBraces.Count == pluginStartListCount + 1)
+                                {
+                                    //表明是扩展代码块最后一个方法结尾
+                                    if (charArray[i + 1] != ',')
+                                    {
+                                        resultPluginMethodEndPosition = i;
+                                    }
+                                }
+                                startBraces.Pop(); //移除掉最近一个大括号开始
+                                if (startBraces.Count < pluginStartListCount)
+                                {
+                                    resultPosition = i;
+                                    break;
+                                }
+                            }
+                        }
+
+                        return new Tuple<int, int>(resultPosition, resultPluginMethodEndPosition);
+                    };
+
+                    //扩展模块脚本
+                    var pluginText = File.ReadAllText(pluginModule.JsLocalPath);
+                    //查找__module_plugins__关键字所在位置
+                    var positionTuple = GetModulePluginEndPosition(pluginText);
+                    var ntext = pluginText;
+                    if (positionTuple.Item2 != 0)
+                    {
+                        ntext = pluginText.Insert(positionTuple.Item2 + 1, ",");
+                    }
+                    var templateText = File.ReadAllText("../../Template/PluginJsFunctionTemplate.js");
+                    templateText = templateText.Replace("{{functionName}}", selectNode.JsFunctionName);
+                    templateText = templateText.Replace("{{pluginType}}", type);
+                    var paramSb = new StringBuilder();
+                    selectNode.JsArgsParams.ForEach(m =>
+                    {
+                        if (m == "e")
+                            paramSb.Append("args, ");
+                        else
+                            paramSb.Append(m + ", ");
+                    });
+                    paramSb.Append("$e");
+                    templateText = templateText.Replace("{{functionParams}}", paramSb.ToString());
+                    ntext = ntext.Insert(positionTuple.Item1 - 1, templateText);
+                    txt_CodeView.Text = ntext;
+
+                    //设置选择的文本。
+                    var start = this.txt_CodeView.Document.OffsetToPosition(positionTuple.Item1 - 1 + 2);
+                    var end = this.txt_CodeView.Document.OffsetToPosition(positionTuple.Item1 - 1 + templateText.Length - 6);
+                    this.txt_CodeView.ActiveTextAreaControl.SelectionManager.SetSelection(new DefaultSelection(this.txt_CodeView.Document, start, end));
+
+                    //滚动到选择的位置。
+                    end.Line += 30;
+                    this.txt_CodeView.ActiveTextAreaControl.Caret.Position = end;
+                    this.txt_CodeView.ActiveTextAreaControl.TextArea.ScrollToCaret();
+                }
+
+                btn_Build.Visible = true;
+                btn_Copy.Visible = true;
             }
         }
 
@@ -1078,6 +1205,35 @@ namespace MyERPSecondDevTools
         private void Item_after_Click(object sender, EventArgs e)
         {
             PluginModule("after");
+        }
+
+        /// <summary>
+        /// 复制到粘贴板
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Copy_Click(object sender, EventArgs e)
+        {
+            if (txt_CodeView.ActiveTextAreaControl.SelectionManager.SelectedText != "")
+            {
+                Clipboard.SetText(txt_CodeView.ActiveTextAreaControl.SelectionManager.SelectedText);
+                MessageBox.Show("已复制所选内容，请粘贴到对应的JS扩展模块下");
+            }
+            else
+            {
+                Clipboard.SetText(txt_CodeView.Text);
+                MessageBox.Show("已复制全部内容，请粘贴到对应的JS扩展模块下");
+            }
+        }
+
+        /// <summary>
+        /// 生成到项目
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_Build_Click(object sender, EventArgs e)
+        {
+
         }
         #endregion
     }

@@ -38,11 +38,22 @@ namespace MyERPSecondDevTools.Decompiler
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<DecompilationOptions>(str);
             }
         }
+
+        /// <summary>
+        /// 反编译类型Cache，已缓存的信息，不需要再次反编译
+        /// </summary>
+        private static Dictionary<string, AvalonEditTextOutput> CacheDictDecompilerTypeInfo { get; set; } = new Dictionary<string, AvalonEditTextOutput>();
+        
         /// <summary>
         /// 获取反编译的类信息
         /// </summary>
         public static AvalonEditTextOutput GetDecompilerTypeInfo(string dllPath, string modulePath, string typeFullName)
         {
+            if(CacheDictDecompilerTypeInfo.ContainsKey(typeFullName))
+            {
+                return CacheDictDecompilerTypeInfo[typeFullName];
+            }
+
             BaseAssemblyResolver.MonoCecilResolvePath = dllPath;
             AvalonEditTextOutput textOutput = new AvalonEditTextOutput();
             ReaderParameters parameters = new ReaderParameters
@@ -60,7 +71,10 @@ namespace MyERPSecondDevTools.Decompiler
                     break;
                 }
             }
+
             module = null;
+            CacheDictDecompilerTypeInfo.Add(typeFullName, textOutput);
+
             return textOutput;
         }
 
