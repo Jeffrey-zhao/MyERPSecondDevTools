@@ -268,7 +268,11 @@ namespace MyERPSecondDevTools
             {
                 Application.DoEvents();
             }
+
+            button_fiddler.Enabled = false;
+            btn_reGo.Enabled = false;
             txt_CodeView.Text = "";
+
             MyERPResponseHtml = webBrowser.Document.All[1].OuterHtml;
             HtmlAgilityPack(MyERPResponseHtml);
         }
@@ -349,47 +353,54 @@ namespace MyERPSecondDevTools
         /// <param name="resHtml"></param>
         private void HtmlAgilityPack(string resHtml)
         {
-            //忽略的非业务JS或者关键路径
-            var ignoreScripts = new List<string>
+            try
             {
-                "template.js",
-                "Helper.js",
-                "mapnumber.js",
-                "CodeFormat.js",
-                "BindData.js",
-                "underscoreDeepExtend.js",
-                "LangRes.js",
-                "/_common/",
-                "/_frontend/"
-            };
-
-            Func<string, bool> ignoreScriptFuc = path =>
-            {
-                return !ignoreScripts.Any(p => path.Contains(p));
-            };
-
-            var businessScripts = new List<string>();
-            var doc = new HtmlAgilityPack.HtmlDocument();
-            doc.LoadHtml(resHtml);
-            var scriptList = doc.DocumentNode.SelectNodes("/html/head/script");
-            foreach (var item in scriptList)
-            {
-                if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                //忽略的非业务JS或者关键路径
+                var ignoreScripts = new List<string>
                 {
-                    businessScripts.Add(item.Attributes["src"].Value);
+                    "template.js",
+                    "Helper.js",
+                    "mapnumber.js",
+                    "CodeFormat.js",
+                    "BindData.js",
+                    "underscoreDeepExtend.js",
+                    "LangRes.js",
+                    "/_common/",
+                    "/_frontend/"
+                };
+
+                Func<string, bool> ignoreScriptFuc = path =>
+                {
+                    return !ignoreScripts.Any(p => path.Contains(p));
+                };
+
+                var businessScripts = new List<string>();
+                var doc = new HtmlAgilityPack.HtmlDocument();
+                doc.LoadHtml(resHtml);
+                var scriptList = doc.DocumentNode.SelectNodes("/html/head/script");
+                foreach (var item in scriptList)
+                {
+                    if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                    {
+                        businessScripts.Add(item.Attributes["src"].Value);
+                    }
                 }
+                //业务JS源码数据
+                var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
+                JsSourceCodeData = jsContentModels;
+                //请求JS解析站点
+                var responseStr = ERPWebRequestHelper.GetWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
+                //JS语法解析站点
+                JsTreeSyntaxResponseHtml = responseStr;
+                //获取JS语法树数据
+                GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
+                //加载树
+                InitTreeData();
             }
-            //业务JS源码数据
-            var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
-            JsSourceCodeData = jsContentModels;
-            //请求JS解析站点
-            var responseStr = ERPWebRequestHelper.GetWebRequest(GlobalData.ToolsJsSyntaxAnalysisWebSite + "?applicationId=" + GlobalData.ApplicationId);
-            //JS语法解析站点
-            JsTreeSyntaxResponseHtml = responseStr;
-            //获取JS语法树数据
-            GetJsSyntaxTree(JsTreeSyntaxResponseHtml);
-            //加载树
-            InitTreeData();
+            catch (Exception)
+            {
+                MessageBox.Show("站点访问异常，请确认能够正常访问！");
+            }
         }
 
         /// <summary>
@@ -976,12 +987,43 @@ namespace MyERPSecondDevTools
                 if (typeInfo != null)
                 {
                     Dictionary<string, string> referenceTypes = new Dictionary<string, string>();
+                    var isExistsPublicInterface = typeInfo.Fields.Any(a => a.FieldTypeName.Contains("PublicService"));
+                    Dictionary<string, string> interfaceMapping = null;
+                    if (isExistsPublicInterface)
+                    {
+                        var appInitializer = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.AssemblyName == typeInfo.AssemblyName && p.TypeName == "AppInitializer");
+                        if(appInitializer != null)
+                        {
+                            try
+                            {
+                                var textOutPut = DecompilerHelper.GetDecompilerTypeInfo(GlobalData.ERPPath + @"\bin", appInitializer.AssemblyPath, appInitializer.TypeFullName);
+                                var appInitializerBody = textOutPut.b.ToString();
+                                interfaceMapping = DecompilerHelper.GetPublicServiceIocMapping(appInitializerBody);
+                            }
+                            catch (Exception)
+                            {
+
+                            }
+                            
+                        }
+                    }
                     typeInfo.Fields.ForEach(f =>
                     {
                         f.FieldTypeName = DecompilerHelper.GetFieldTypeName(f.FieldTypeName);
                         if (f.FieldTypeName.EndsWith("DomainService"))
                         {
                             referenceTypes.Add(f.FieldName, f.FieldTypeName);
+                        }
+                        if (f.FieldTypeName.EndsWith("PublicService"))
+                        {
+                            var fieldTypeName = f.FieldTypeName.Contains(".") ? f.FieldTypeName.Substring(f.FieldTypeName.LastIndexOf(".")+1) : f.FieldTypeName;
+                            if (interfaceMapping != null && interfaceMapping.ContainsKey(fieldTypeName))
+                            {
+                                var value = interfaceMapping[fieldTypeName];
+                                var implementType = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.TypeName == value);
+                                if (implementType != null)
+                                    referenceTypes.Add(f.FieldName, f.FieldTypeName);
+                            }
                         }
                     });
                     foreach (var dict in referenceTypes)

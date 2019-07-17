@@ -20,6 +20,10 @@ namespace MyERPSecondDevTools.Model.Model
 
     public class MyERPBusinessAssemblyTypeInfo
     {
+        public string AssemblyPath { get; set; }
+
+        public string AssemblyName { get; set; }
+
         public string TypeName { get; set; }
 
         public string TypeFullName { get; set; }

@@ -150,6 +150,8 @@ namespace MyERPSecondDevTools.Common
                             MyERPBusinessAssemblyTypeInfo typeInfo = new MyERPBusinessAssemblyTypeInfo();
                             typeInfo.TypeName = t.Name;
                             typeInfo.TypeFullName = t.FullName;
+                            typeInfo.AssemblyName = assemblyInfo.AssemblyName;
+                            typeInfo.AssemblyPath = assemblyInfo.AssemblyPath;
 
                             var ms = t.Methods;
                             var prs = t.Fields;
