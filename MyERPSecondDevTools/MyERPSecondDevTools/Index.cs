@@ -1,6 +1,7 @@
 ﻿using ICSharpCode.TextEditor.Document;
 using MyERPSecondDevTools.Common;
 using MyERPSecondDevTools.Decompiler;
+using MyERPSecondDevTools.Model.Enum;
 using MyERPSecondDevTools.Model.Ext;
 using MyERPSecondDevTools.Model.Model;
 using Newtonsoft.Json;
@@ -14,6 +15,7 @@ using System.Drawing;
 using System.IO;
 using System.Linq;
 using System.Net;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -97,6 +99,7 @@ namespace MyERPSecondDevTools
             item_override.Click += Item_override_Click;
             btn_Build.Visible = false;
             btn_Copy.Visible = false;
+            btn_reGo.Enabled = false;
         }
 
         /// <summary>
@@ -246,10 +249,28 @@ namespace MyERPSecondDevTools
             }
 
             button_fiddler.Enabled = false;
+            btn_reGo.Enabled = false;
+            txt_CodeView.Text = "";
 
             var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
             webBrowser.Navigate(url);
             webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
+        }
+
+        /// <summary>
+        /// 再次解析页面
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void btn_reGo_Click(object sender, EventArgs e)
+        {
+            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+            {
+                Application.DoEvents();
+            }
+            txt_CodeView.Text = "";
+            MyERPResponseHtml = webBrowser.Document.All[1].OuterHtml;
+            HtmlAgilityPack(MyERPResponseHtml);
         }
 
         /// <summary>
@@ -279,6 +300,45 @@ namespace MyERPSecondDevTools
             //只执行一次
             timer_GetResponse.Stop();
             HtmlAgilityPack(MyERPResponseHtml);
+
+            var tdDocument = webBrowser.Document.GetElementById("appForm_mainTabId");
+            if (tdDocument != null)
+            {
+                var tempDocument = tdDocument.GetElementsByTagName("td");
+
+                foreach (HtmlElement td in tempDocument)
+                {
+                    if (td.GetAttribute("className").Contains("mini-tab"))
+                    {
+                        td.Click += Td_Click;
+                    }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 页面选项页签的点击事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void Td_Click(object sender, HtmlElementEventArgs e)
+        {
+            timer_InvorkScript.Start();
+        }
+
+        /// <summary>
+        /// 执行页面脚本Timer，延迟执行
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void timer_InvorkScript_Tick(object sender, EventArgs e)
+        {
+            timer_InvorkScript.Stop();
+            HtmlElement ele = webBrowser.Document.CreateElement("script");
+            ele.SetAttribute("type", "text/javascript");
+            ele.SetAttribute("text", "function webBrowerMouse(){ $('#design-mode-entrance').find('.btn-menu').trigger('mouseover'); $('.nav-setting-entrance-menu').hide(); }");
+            webBrowser.Document.Body.AppendChild(ele);
+            webBrowser.Document.InvokeScript("webBrowerMouse");
         }
         #endregion
 
@@ -597,6 +657,7 @@ namespace MyERPSecondDevTools
             }).ToList();
 
             button_fiddler.Enabled = true;
+            btn_reGo.Enabled = true;
         }
 
         /// <summary>
@@ -968,7 +1029,7 @@ namespace MyERPSecondDevTools
                         }
                         else
                         {
-                            showMethodName =m.MethodName;
+                            showMethodName = m.MethodName;
                         }
                         TreeNodeExt subnode = new TreeNodeExt
                         {
@@ -1187,9 +1248,9 @@ namespace MyERPSecondDevTools
                 if (typeInfo != null)
                 {
                     var method = typeInfo.Methods.FirstOrDefault(p => p.MethodName == selectNode.CsMethodName);
-                    if(method != null)
+                    if (method != null)
                     {
-                        if(!method.IsPublic)
+                        if (!method.IsPublic)
                             MessageBox.Show("此方法不是Public访问修饰，不能扩展！");
                     }
 
@@ -1212,7 +1273,7 @@ namespace MyERPSecondDevTools
                             notesReturnType = "        /// <returns></returns>\r\n";
                             break;
                     }
-                    
+
                     var templateText = File.ReadAllText("../../Template/CsharpPluginMethodTemplate.txt");
                     templateText = templateText.Replace("{{methodFullName}}", selectNode.CsTypeName + "." + selectNode.CsMethodName);
                     templateText = templateText.Replace("{{pluginType}}", pluginType);
@@ -1303,7 +1364,7 @@ namespace MyERPSecondDevTools
                     return;
                 }
                 var moduleInfo = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
-                var filePath = GlobalData.ERPPath+ @"\Customize\" + moduleInfo.JsLocalPath.Replace(GlobalData.ERPPath, string.Empty);
+                var filePath = GlobalData.ERPPath + @"\Customize\" + moduleInfo.JsLocalPath.Replace(GlobalData.ERPPath, string.Empty);
                 FileInfo fileInfo = new FileInfo(filePath);
                 if (!Directory.Exists(fileInfo.DirectoryName))
                 {

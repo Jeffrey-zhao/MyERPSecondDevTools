@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Enum\ShowCommands.cs" />
     <Compile Include="Ext\TreeNodeExt.cs" />
     <Compile Include="Model\GetJsModuleAllFunctionRequest.cs" />
     <Compile Include="Model\AppDataModel.cs" />

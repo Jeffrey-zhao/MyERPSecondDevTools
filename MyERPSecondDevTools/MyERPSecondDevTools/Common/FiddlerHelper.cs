@@ -28,9 +28,11 @@ namespace MyERPSecondDevTools.Common
             if (!host.ToLower().Contains("http://"))
                 host = "http://" + host;
             GlobalData.ERPHost = host;
-
+            //加入随机参数
+            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
+            long timeStamp = Convert.ToInt64(ts.TotalSeconds);
             //OA集成登录地址
-            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?{GlobalData.ERPUserCodeParamName}={GlobalData.ERPUserCode}&{GlobalData.ERPJumpPageParamName}={System.Web.HttpUtility.UrlEncode(pageUrl)}";
+            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?{GlobalData.ERPUserCodeParamName}={GlobalData.ERPUserCode}&{GlobalData.ERPJumpPageParamName}={System.Web.HttpUtility.UrlEncode(pageUrl)}&timemp=" + timeStamp;
             return formatRequestUrl;
         }
 
@@ -189,6 +191,22 @@ namespace MyERPSecondDevTools.Common
                     return "网格加载事件";
                 else if (functionName.Contains("_appGrid") && functionName.Contains("_query"))
                     return "网格加载事件";
+                else if (functionName.Contains("drawCell"))
+                    return "单元格绘制事件";
+                else if (functionName.Contains("deSelect"))
+                    return "行取消选中后事件";
+                else if (functionName.Contains("beforeSelect"))
+                    return "行取消选中前事件";
+                else if (functionName.Contains("select"))
+                    return "行选中后事件";
+                else if (functionName.Contains("beforeDeselect"))
+                    return "行取消选中前事件";
+                else if (functionName.Contains("beforeRowEdit"))
+                    return "行编辑前事件";
+                else if (functionName.Contains("rowEdit"))
+                    return "行编辑后事件";
+                else if (functionName.Contains("cellBeginEdit"))
+                    return "列编辑前事件";
                 else
                     return functionName;
             };
@@ -298,7 +316,7 @@ namespace MyERPSecondDevTools.Common
                             if (sitem.FunctionName.IndexOf(".") <= 0)
                             {
                                 //页面是产品页面，按钮是二开，则更新为Plugin
-                                if (jsonObject["item"]["metadataStatus"].ToString() == "product" && item.MetaDataStatus == "customize")
+                                if ((jsonObject["item"]["metadataStatus"].ToString() == "product" && item.MetaDataStatus == "customize") || item.MetaDataStatus == "customize" || jsonObject["item"]["metadataStatus"].ToString() == "extend")
                                 {
                                     sitem.FunctionName = pageModuleName + ".Plugin." + sitem.FunctionName;
                                     sitem.IsProduct = false;
