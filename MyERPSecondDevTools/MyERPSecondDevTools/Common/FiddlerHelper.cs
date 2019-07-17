@@ -187,6 +187,8 @@ namespace MyERPSecondDevTools.Common
                     return "树网格查询事件";
                 else if (functionName.Contains("_appTreeGrid") && name == "onload")
                     return "树网格加载事件";
+                else if (functionName.Contains("_appForm") && functionName.Contains("init"))
+                    return "网格初始化事件";
                 else if (functionName.Contains("_appGrid") && name == "onload")
                     return "网格加载事件";
                 else if (functionName.Contains("_appGrid") && functionName.Contains("_query"))
@@ -268,28 +270,61 @@ namespace MyERPSecondDevTools.Common
                         {
                             foreach (var secItem in subItem["items"])
                             {
-                                var model = new PluginPointModel
+                                if (secItem["items"] == null || secItem["items"].Count() == 0)
                                 {
-                                    Type = "按钮",
-                                    ControlId = secItem["id"].ToString(),
-                                    MetaDataStatus = secItem["metadataStatus"].ToString(),
-                                    Title = GetToolBarTitleByName(item["type"].ToString(), subItem["align"].ToString()) + "-" + secItem["title"].ToString(),
-                                    Events = new List<PluginPointModelEvent>()
-                                };
-                                var flag = true;
-                                foreach (var fourItem in secItem["events"])
-                                {
-                                    if (fourItem["functionName"].ToString().StartsWith("Mysoft.Map"))
-                                        flag = false;
-                                    else
-                                        model.Events.Add(new PluginPointModelEvent
-                                        {
-                                            EventName = fourItem["name"].ToString(),
-                                            FunctionName = fourItem["functionName"].ToString(),
-                                        });
+                                    //节点类型为按钮
+                                    var model = new PluginPointModel
+                                    {
+                                        Type = "按钮",
+                                        ControlId = secItem["id"].ToString(),
+                                        MetaDataStatus = secItem["metadataStatus"].ToString(),
+                                        Title = GetToolBarTitleByName(item["type"].ToString(), subItem["align"].ToString()) + "-" + secItem["title"].ToString(),
+                                        Events = new List<PluginPointModelEvent>()
+                                    };
+                                    var flag = true;
+                                    foreach (var fourItem in secItem["events"])
+                                    {
+                                        if (fourItem["functionName"].ToString().StartsWith("Mysoft.Map"))
+                                            flag = false;
+                                        else
+                                            model.Events.Add(new PluginPointModelEvent
+                                            {
+                                                EventName = fourItem["name"].ToString(),
+                                                FunctionName = fourItem["functionName"].ToString(),
+                                            });
+                                    }
+                                    if (flag)
+                                        pluginPointModels.Add(model);
                                 }
-                                if (flag)
-                                    pluginPointModels.Add(model);
+                                else
+                                {
+                                    //节点类型为按钮组
+                                    foreach (var fourItem in secItem["items"])
+                                    {
+                                        var model = new PluginPointModel
+                                        {
+                                            Type = "按钮组",
+                                            ControlId = fourItem["id"].ToString(),
+                                            MetaDataStatus = fourItem["metadataStatus"].ToString(),
+                                            Title = GetToolBarTitleByName(item["type"].ToString(), subItem["align"].ToString()) + "-" + "按钮组" + "-" + fourItem["title"].ToString(),
+                                            Events = new List<PluginPointModelEvent>()
+                                        };
+                                        var flag = true;
+                                        foreach (var fiveItem in fourItem["events"])
+                                        {
+                                            if (fiveItem["functionName"].ToString().StartsWith("Mysoft.Map"))
+                                                flag = false;
+                                            else
+                                                model.Events.Add(new PluginPointModelEvent
+                                                {
+                                                    EventName = fiveItem["name"].ToString(),
+                                                    FunctionName = fiveItem["functionName"].ToString(),
+                                                });
+                                        }
+                                        if (flag)
+                                            pluginPointModels.Add(model);
+                                    }
+                                }
                             }
                         }
                     }
