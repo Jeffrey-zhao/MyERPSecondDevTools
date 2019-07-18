@@ -262,7 +262,7 @@
             this.Icon = ((System.Drawing.Icon)(resources.GetObject("$this.Icon")));
             this.Name = "MyERPSecondDevTools";
             this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "明源ERP二开工具箱 - V1.0.0";
+            this.Text = "明源ERP二开工具箱 - V1.1.0";
             this.WindowState = System.Windows.Forms.FormWindowState.Maximized;
             this.FormClosing += new System.Windows.Forms.FormClosingEventHandler(this.MyERPSecondDevTools_FormClosing);
             this.Load += new System.EventHandler(this.MyERPSecondDevTools_Load);
