@@ -137,6 +137,7 @@
     <Compile Include="Common\FiddlerHelper.cs" />
     <Compile Include="Common\FolderHelper.cs" />
     <Compile Include="Common\GlobalData.cs" />
+    <Compile Include="Common\MessageBoxTimeOut.cs" />
     <Compile Include="Common\SqlHelper.cs" />
     <Compile Include="Index.cs">
       <SubType>Form</SubType>
@@ -214,6 +215,7 @@
   <ItemGroup>
     <None Include="icons\复制.png" />
     <None Include="icons\生成目录.png" />
+    <None Include="icons\成功.png" />
     <Content Include="index.ico" />
     <Content Include="Template\CsharpPluginMethodTemplate.txt" />
     <Content Include="Template\PluginJsFunctionTemplate.js" />

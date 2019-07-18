@@ -261,7 +261,7 @@ namespace MyERPSecondDevTools
             if (!GoPageUrl.Equals(txt_pageUrl.Text))
             {
                 //新地址，浏览器跳转
-                GoPageUrl = txt_pageUrl.Text;
+
                 var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
                 webBrowser.Navigate(url);
                 webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
@@ -286,13 +286,17 @@ namespace MyERPSecondDevTools
         /// <param name="e"></param>
         private void webBrowser1_DocumentCompleted(object sender, WebBrowserDocumentCompletedEventArgs e)
         {
-            //ERP站点
-            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+            if (!GoPageUrl.Equals(txt_pageUrl.Text))
             {
-                Application.DoEvents();
+                //ERP站点
+                while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+                {
+                    Application.DoEvents();
+                }
+                GoPageUrl = txt_pageUrl.Text;
+                //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
+                timer_GetResponse.Start();
             }
-            //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
-            timer_GetResponse.Start();
         }
 
         /// <summary>
@@ -382,13 +386,43 @@ namespace MyERPSecondDevTools
                 var doc = new HtmlAgilityPack.HtmlDocument();
                 doc.LoadHtml(resHtml);
                 var scriptList = doc.DocumentNode.SelectNodes("/html/head/script");
-                foreach (var item in scriptList)
+                if (scriptList != null && scriptList.Count > 0)
                 {
-                    if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                    foreach (var item in scriptList)
                     {
-                        businessScripts.Add(item.Attributes["src"].Value);
+                        if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                        {
+                            var scriptUrl = item.Attributes["src"].Value.Contains("?") ? item.Attributes["src"].Value.Substring(0, item.Attributes["src"].Value.IndexOf("?")) : item.Attributes["src"].Value;
+                            if (!businessScripts.Any(a => a == scriptUrl))
+                                businessScripts.Add(scriptUrl);
+                        }
                     }
                 }
+
+                var webIframes = webBrowser.Document.Window.Frames;
+                if (webIframes.Count > 0)
+                {
+                    //加载Iframe中的JS脚本文件
+                    foreach (HtmlWindow iframe in webIframes)
+                    {
+                        var outHtml = iframe.Document.All[1].OuterHtml;
+                        doc.LoadHtml(outHtml);
+                        scriptList = doc.DocumentNode.SelectNodes("/html/head/script");
+                        if (scriptList != null && scriptList.Count > 0)
+                        {
+                            foreach (var item in scriptList)
+                            {
+                                if (item.Attributes.Count > 0 && item.Attributes.Contains("src") && ignoreScriptFuc(item.Attributes["src"].Value))
+                                {
+                                    var scriptUrl = item.Attributes["src"].Value.Contains("?") ? item.Attributes["src"].Value.Substring(0, item.Attributes["src"].Value.IndexOf("?")) : item.Attributes["src"].Value;
+                                    if (!businessScripts.Any(a => a == scriptUrl))
+                                        businessScripts.Add(scriptUrl);
+                                }
+                            }
+                        }
+                    }
+                }
+
                 //业务JS源码数据
                 var jsContentModels = FiddlerHelper.GetERPBusinessJsModels(businessScripts);
                 JsSourceCodeData = jsContentModels;
@@ -433,6 +467,21 @@ namespace MyERPSecondDevTools
                         model.JsLocalPath = model.JsLocalPath.Replace("/", @"\");
                         MyERPBusJsAndTreeModels.Add(model);
                     }
+                }
+            }
+        }
+
+        /// <summary>
+        /// 删掉没有子节点的节点
+        /// </summary>
+        /// <param name="treeNode"></param>
+        private void ClearEmptyTreeNode(params TreeNode[] treeNodes)
+        {
+            foreach (var node in treeNodes)
+            {
+                if (node.Nodes == null || node.Nodes.Count == 0)
+                {
+                    node.Remove();
                 }
             }
         }
@@ -609,6 +658,8 @@ namespace MyERPSecondDevTools
                         }
                     }
                     firstTn.Nodes.Add(tn);
+
+                    ClearEmptyTreeNode(tn);
                 }
                 tv_code.Nodes.Add(firstTn);
                 #endregion
@@ -661,7 +712,7 @@ namespace MyERPSecondDevTools
 
                 #endregion
 
-                tabControl.SelectedTab = tabPage2;
+                //tabControl.SelectedTab = tabPage2;
 
                 //后台线程程序集还没有加载完毕，需要等待执行成功
                 while (!FolderHelper.IsInitAssemblySuccess())
@@ -677,6 +728,10 @@ namespace MyERPSecondDevTools
                 FolderHelper.InitIOCMapping();
 
                 button_fiddler.Enabled = true;
+                ClearEmptyTreeNode(firstTn, firstTn2);
+
+                MessageBoxTimeOut mb = new MessageBoxTimeOut();
+                mb.Show("加载成功，请切换页面引用选项卡!", "提示(窗体3秒后自动关闭...)");
             }
             else
             {
@@ -995,7 +1050,7 @@ namespace MyERPSecondDevTools
                 {
                     Dictionary<string, string> referenceTypes = new Dictionary<string, string>();
                     var isExistsPublicInterface = typeInfo.Fields.Any(a => a.FieldTypeName.Contains("PublicService"));
-                    typeInfo.Fields.ForEach(f =>
+                    typeInfo.Fields.OrderBy(o => o.FieldName).ToList().ForEach(f =>
                     {
                         f.FieldTypeName = DecompilerHelper.GetFieldTypeName(f.FieldTypeName);
                         if (f.FieldTypeName.EndsWith("DomainService"))
@@ -1049,36 +1104,36 @@ namespace MyERPSecondDevTools
                 var typeInfo = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.TypeFullName == selectNode.CsTypeName);
                 if (typeInfo != null)
                 {
-                    typeInfo.Methods.ForEach(m =>
-                    {
-                        var showMethodName = string.Empty;
-                        if (m.Paramters.Count > 0)
-                        {
-                            var sb = new StringBuilder();
-                            foreach (var item in m.Paramters)
-                            {
-                                sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
-                            }
-                            var tempStr = sb.ToString().TrimEnd(',');
-                            showMethodName = m.MethodName + "(" + tempStr + ")";
-                        }
-                        else
-                        {
-                            showMethodName = m.MethodName;
-                        }
-                        TreeNodeExt subnode = new TreeNodeExt
-                        {
-                            Text = showMethodName,
-                            CsMethodName = m.MethodName,
-                            CsTypeName = typeInfo.TypeFullName,
-                            Tag = m.MethodName,
-                            Type = "backMethodReferenceMethod",
-                            GlobalType = "back",
-                            ContextMenuStrip = contextMenuStrip
-                        };
+                    typeInfo.Methods.OrderBy(m => m.MethodName).ToList().ForEach(m =>
+                      {
+                          var showMethodName = string.Empty;
+                          if (m.Paramters.Count > 0)
+                          {
+                              var sb = new StringBuilder();
+                              foreach (var item in m.Paramters)
+                              {
+                                  sb.AppendFormat("{0} {1},", item.ParameterType, item.ParameterName);
+                              }
+                              var tempStr = sb.ToString().TrimEnd(',');
+                              showMethodName = m.MethodName + "(" + tempStr + ")";
+                          }
+                          else
+                          {
+                              showMethodName = m.MethodName;
+                          }
+                          TreeNodeExt subnode = new TreeNodeExt
+                          {
+                              Text = showMethodName,
+                              CsMethodName = m.MethodName,
+                              CsTypeName = typeInfo.TypeFullName,
+                              Tag = m.MethodName,
+                              Type = "backMethodReferenceMethod",
+                              GlobalType = "back",
+                              ContextMenuStrip = contextMenuStrip
+                          };
 
-                        selectNode.Nodes.Add(subnode);
-                    });
+                          selectNode.Nodes.Add(subnode);
+                      });
                 }
             }
         }
@@ -1102,7 +1157,7 @@ namespace MyERPSecondDevTools
 
                     //设置选择的文本。
                     var start = this.txt_CodeView.Document.OffsetToPosition(positionIndex);
-                    var end = this.txt_CodeView.Document.OffsetToPosition(positionIndex + keyWord.Length);
+                    var end = this.txt_CodeView.Document.OffsetToPosition(positionIndex + keyWord.Length - 1);
                     this.txt_CodeView.ActiveTextAreaControl.SelectionManager.SetSelection(new DefaultSelection(this.txt_CodeView.Document, start, end));
 
                     //滚动到选择的位置。
@@ -1409,7 +1464,7 @@ namespace MyERPSecondDevTools
                     var productModuleInfo = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName);
                     filePath = GlobalData.ERPPath + @"\Customize\" + productModuleInfo.JsLocalPath.Replace(GlobalData.ERPPath, string.Empty);
                 }
-                
+
                 FileInfo fileInfo = new FileInfo(filePath);
                 if (!Directory.Exists(fileInfo.DirectoryName))
                 {

@@ -65,7 +65,7 @@ namespace MyERPSecondDevTools.Common
                             models.Add(new MyERPBusinessJsModel
                             {
                                 ApplicationId = applicationId,
-                                JsName = m.Substring(0, m.IndexOf("?")),
+                                JsName = m.Contains("?") ? m.Substring(0, m.IndexOf("?")) : m,
                                 JsContent = downLoadString
                             });
                         }
