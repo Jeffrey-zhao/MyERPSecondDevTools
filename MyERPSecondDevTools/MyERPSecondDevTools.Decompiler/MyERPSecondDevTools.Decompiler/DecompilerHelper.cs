@@ -34,7 +34,7 @@ namespace MyERPSecondDevTools.Decompiler
         {
             get
             {
-                var str = File.ReadAllText(@"../../AppData/options.json");
+                var str = File.ReadAllText(@"AppData/options.json");
                 return Newtonsoft.Json.JsonConvert.DeserializeObject<DecompilationOptions>(str);
             }
         }

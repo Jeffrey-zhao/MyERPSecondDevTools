@@ -21,8 +21,7 @@ namespace MyERPSecondDevTools.Common
             if (!historyPaths.Contains(path))
             {
                 historyPaths.Add(path);
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/appData.json";
+                var filePath = "AppData/appData.json";
                 if (!File.Exists(filePath))
                 {
                     var emptyData = new
@@ -50,8 +49,7 @@ namespace MyERPSecondDevTools.Common
             try
             {
                 List<string> historyPaths = new List<string>();
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/appData.json";
+                var filePath = "AppData/appData.json";
                 if (File.Exists(filePath))
                 {
                     StreamReader file = File.OpenText(filePath);
@@ -81,8 +79,7 @@ namespace MyERPSecondDevTools.Common
             var applicationId = ReadApplicationId();
             if (applicationId == Guid.Empty)
             {
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/appData.json";
+                var filePath = "AppData/appData.json";
                 if (!File.Exists(filePath))
                 {
                     var emptyData = new
@@ -116,8 +113,7 @@ namespace MyERPSecondDevTools.Common
             try
             {
                 Guid applicationId = Guid.Empty;
-                DirectoryInfo directory = new DirectoryInfo(Environment.CurrentDirectory);
-                var filePath = directory.Parent.Parent.FullName + "/AppData/appData.json";
+                var filePath = "AppData/appData.json";
                 if (File.Exists(filePath))
                 {
                     StreamReader file = File.OpenText(filePath);

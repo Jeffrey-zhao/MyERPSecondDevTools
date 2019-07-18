@@ -1240,7 +1240,7 @@ namespace MyERPSecondDevTools
                 var pluginModule = MyERPBusJsAndTreeModels.FirstOrDefault(p => p.JsModuleName == selectNode.JsModuleName + ".Plugin");
                 if (pluginModule == null)
                 {
-                    var templateText = File.ReadAllText("../../Template/PluginModuleTemplate.js");
+                    var templateText = File.ReadAllText("Template/PluginModuleTemplate.js");
                     templateText = templateText.Replace("{{modulePluginName}}", selectNode.JsModuleName + ".Plugin");
                     templateText = templateText.Replace("{{functionName}}", selectNode.JsFunctionName);
                     templateText = templateText.Replace("{{pluginType}}", type);
@@ -1312,7 +1312,7 @@ namespace MyERPSecondDevTools
                     {
                         ntext = pluginText.Insert(positionTuple.Item2 + 1, ",");
                     }
-                    var templateText = File.ReadAllText("../../Template/PluginJsFunctionTemplate.js");
+                    var templateText = File.ReadAllText("Template/PluginJsFunctionTemplate.js");
                     templateText = templateText.Replace("{{functionName}}", selectNode.JsFunctionName);
                     templateText = templateText.Replace("{{pluginType}}", type);
                     var paramSb = new StringBuilder();
@@ -1376,7 +1376,7 @@ namespace MyERPSecondDevTools
                             break;
                     }
 
-                    var templateText = File.ReadAllText("../../Template/CsharpPluginMethodTemplate.txt");
+                    var templateText = File.ReadAllText("Template/CsharpPluginMethodTemplate.txt");
                     templateText = templateText.Replace("{{methodFullName}}", selectNode.CsTypeName + "." + selectNode.CsMethodName);
                     templateText = templateText.Replace("{{pluginType}}", pluginType);
                     templateText = templateText.Replace("{{pluginReturnType}}", returnType);
