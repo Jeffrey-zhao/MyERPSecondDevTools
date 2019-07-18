@@ -4,6 +4,9 @@ using System.Windows.Forms;
 
 namespace MyERPSecondDevTools.Common
 {
+    /// <summary>
+    /// 定时关闭的提示窗
+    /// </summary>
     public class MessageBoxTimeOut
     {
         private string _caption;
