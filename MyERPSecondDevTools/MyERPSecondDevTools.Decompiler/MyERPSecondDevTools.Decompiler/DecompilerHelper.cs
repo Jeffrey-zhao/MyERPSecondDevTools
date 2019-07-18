@@ -105,42 +105,5 @@ namespace MyERPSecondDevTools.Decompiler
             }
             return str;
         }
-
-        /// <summary>
-        /// 根据AppInitializer代码主体获取
-        /// </summary>
-        /// <param name="AppInitializerBody"></param>
-        /// <returns></returns>
-        public static Dictionary<string, string> GetPublicServiceIocMapping(string AppInitializerBody)
-        {
-            using (StringReader sr = new StringReader(AppInitializerBody))
-            {
-                Dictionary<string, string> result = new Dictionary<string, string>();
-                while (true)
-                {
-                    var read_str = sr.ReadLine();
-                    if (read_str != null)
-                    {
-                        if (read_str.Contains("PublicServiceContainer.Register"))
-                        {
-                            read_str = read_str.Replace("PublicServiceContainer.Register", "").Replace("();", "");
-                            var strArray = read_str.Split('.');
-                            if (strArray != null && strArray.Length == 2)
-                            {
-                                var implementType = GetFieldTypeName(strArray[0]);
-                                var interfaceName = GetFieldTypeName(strArray[1]);
-                                result.Add(interfaceName, implementType);
-                            }
-                        }
-                    }
-                    else
-                    {
-                        break;
-                    }
-                }
-
-                return result;
-            }
-        }
     }
 }

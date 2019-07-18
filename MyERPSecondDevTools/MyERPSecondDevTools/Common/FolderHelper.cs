@@ -16,6 +16,9 @@ using System.Threading.Tasks;
 using MyERPSecondDevTools.Model.Model;
 using System.Text.RegularExpressions;
 using MyERPSecondDevTools.Decompiler;
+using System.Collections.Concurrent;
+using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
 
 namespace MyERPSecondDevTools.Common
 {
@@ -120,7 +123,10 @@ namespace MyERPSecondDevTools.Common
         /// </summary>
         private static void InitAssemblyInfo()
         {
+            //程序集集合
             GlobalData.MyERPBusinessAssemblyInfos = new System.Collections.Concurrent.ConcurrentBag<MyERPBusinessAssemblyInfo>();
+            //PublicService接口和实现类的IOC映射集合
+            GlobalData.IOCMappingBody = new ConcurrentBag<Collection<Instruction>>();
             DirectoryInfo directoryInfo = new DirectoryInfo(GlobalData.ERPPath + "/bin");
             var files = directoryInfo.GetFiles("*.dll").ToList().FindAll(p => p.Name.StartsWith("Mysoft") && !p.Name.StartsWith("Mysoft.Map"));
             var totalCount = files.Count;
@@ -185,6 +191,22 @@ namespace MyERPSecondDevTools.Common
                                 }
                             }
                             assemblyInfo.Types.Add(typeInfo);
+
+                            if (t.Name == "AppInitializer")
+                            {
+                                //查找IOC的映射配置
+                                var initMs = t.Methods;
+                                foreach (var method in ms)
+                                {
+                                    if (method.Name == "Init")
+                                    {
+                                        if (method.HasBody)
+                                        {
+                                            GlobalData.IOCMappingBody.Add(method.Body.Instructions);
+                                        }
+                                    }
+                                }
+                            }
                         }
                     }
                     GlobalData.MyERPBusinessAssemblyInfos.Add(assemblyInfo);
@@ -226,6 +248,58 @@ namespace MyERPSecondDevTools.Common
                 return true;
             else
                 return false;
+        }
+
+        /// <summary>
+        /// 初始化IOC容器映射信息
+        /// </summary>
+        public static void InitIOCMapping()
+        {
+            if (GlobalData.IOCMapping == null)
+            {
+                GlobalData.IOCMapping = new Dictionary<string, string>();
+                foreach (var body in GlobalData.IOCMappingBody)
+                {
+                    string implementTypeFullName = null;
+                    string interfaceTypeFullName = null;
+                    foreach (var item in body)
+                    {
+                        if (item.Operand != null)
+                        {
+                            dynamic temp = item.Operand;
+                            try
+                            {
+                                if (temp.Name == "Register")
+                                {
+                                    Regex rex = new Regex("(?<MYSTR><.*>)");
+                                    string tempName = temp.FullName;
+                                    tempName = tempName.Substring(tempName.IndexOf("Register"));
+                                    var fullName = rex.Match(tempName).Groups["MYSTR"].ToString().Replace("<", "").Replace(">", "");
+                                    implementTypeFullName = DecompilerHelper.GetFieldTypeName(fullName);
+                                }
+                                else if (temp.Name == "As")
+                                {
+                                    string tempName = temp.FullName;
+                                    tempName = tempName.Substring(tempName.IndexOf("As"));
+                                    Regex rex = new Regex("(?<MYSTR><.*>)");
+                                    var fullName = rex.Match(tempName).Groups["MYSTR"].ToString().Replace("<", "").Replace(">", "");
+                                    interfaceTypeFullName = DecompilerHelper.GetFieldTypeName(fullName);
+                                    if (implementTypeFullName != null && interfaceTypeFullName != null)
+                                    {
+                                        GlobalData.IOCMapping.Add(interfaceTypeFullName, implementTypeFullName);
+                                        implementTypeFullName = null;
+                                        interfaceTypeFullName = null;
+                                    }
+                                }
+                            }
+                            catch (Exception e)
+                            {
+                                
+                            }
+                        }
+                    }
+                }
+            }
         }
     }
 }

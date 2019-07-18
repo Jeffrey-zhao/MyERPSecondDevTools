@@ -43,7 +43,6 @@
             this.tabPage2 = new System.Windows.Forms.TabPage();
             this.txt_CodeView = new ICSharpCode.TextEditor.TextEditorControl();
             this.tv_code = new System.Windows.Forms.TreeView();
-            this.btn_reGo = new System.Windows.Forms.Button();
             this.button_fiddler = new System.Windows.Forms.Button();
             this.txt_pageUrl = new System.Windows.Forms.TextBox();
             this.timer_GetResponse = new System.Windows.Forms.Timer(this.components);
@@ -119,7 +118,6 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.tabControl);
-            this.groupBox1.Controls.Add(this.btn_reGo);
             this.groupBox1.Controls.Add(this.button_fiddler);
             this.groupBox1.Controls.Add(this.txt_pageUrl);
             this.groupBox1.Dock = System.Windows.Forms.DockStyle.Fill;
@@ -194,18 +192,6 @@
             this.tv_code.TabIndex = 0;
             this.tv_code.Click += new System.EventHandler(this.tv_code_Click);
             this.tv_code.MouseDown += new System.Windows.Forms.MouseEventHandler(this.tv_code_MouseDown);
-            // 
-            // btn_reGo
-            // 
-            this.btn_reGo.Anchor = ((System.Windows.Forms.AnchorStyles)((System.Windows.Forms.AnchorStyles.Top | System.Windows.Forms.AnchorStyles.Right)));
-            this.btn_reGo.BackgroundImageLayout = System.Windows.Forms.ImageLayout.Zoom;
-            this.btn_reGo.Location = new System.Drawing.Point(1302, 13);
-            this.btn_reGo.Name = "btn_reGo";
-            this.btn_reGo.Size = new System.Drawing.Size(75, 23);
-            this.btn_reGo.TabIndex = 1;
-            this.btn_reGo.Text = "ReGo";
-            this.btn_reGo.UseVisualStyleBackColor = true;
-            this.btn_reGo.Click += new System.EventHandler(this.btn_reGo_Click);
             // 
             // button_fiddler
             // 
@@ -313,7 +299,6 @@
         private ICSharpCode.TextEditor.TextEditorControl txt_CodeView;
         private System.Windows.Forms.ToolStripButton btn_Copy;
         private System.Windows.Forms.ToolStripButton btn_Build;
-        private System.Windows.Forms.Button btn_reGo;
         private System.Windows.Forms.Timer timer_InvorkScript;
     }
 }

@@ -1,4 +1,6 @@
-﻿using MyERPSecondDevTools.Model.Model;
+﻿using Mono.Cecil.Cil;
+using Mono.Collections.Generic;
+using MyERPSecondDevTools.Model.Model;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -73,8 +75,18 @@ namespace MyERPSecondDevTools.Common
         public static string ERPHost { get; set; }
 
         /// <summary>
-        /// 明源ERP程序集信息
+        /// ERP程序集信息
         /// </summary>
         public static ConcurrentBag<MyERPBusinessAssemblyInfo> MyERPBusinessAssemblyInfos { get; set; }
+
+        /// <summary>
+        /// IOC映射信息主体
+        /// </summary>
+        public static ConcurrentBag<Collection<Instruction>> IOCMappingBody { get; set; }
+
+        /// <summary>
+        /// IOC容器映射信息
+        /// </summary>
+        public static Dictionary<string, string> IOCMapping { get; set; }
     }
 }

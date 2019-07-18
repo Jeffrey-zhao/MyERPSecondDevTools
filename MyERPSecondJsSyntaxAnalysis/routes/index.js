@@ -16,15 +16,19 @@ router.get('/', function (req, res, next) {
     var jsTreeData = [];
     var updateStr = "";
     jsData.recordsets[0].forEach(element => {
-      var esprimaTree = esprima.parseScript(element.JsData);
-      var strEsprimaTree = JSON.stringify(esprimaTree);
-      var moduleName = esprimaTree.body[0].expression.arguments[0].value;
-      updateStr += " UPDATE dbo.MyERPDevToolsScripts SET JsModuleName='" + moduleName + "' WHERE ApplicationId='" + element.ApplicationId + "' AND JsName='" + element.JsName + "';";
-      jsTreeData.push({
-        JsPath: element.JsName,
-        JsModuleName: esprimaTree.body[0].expression.arguments[0].value,
-        JsSyntaxTreeJson: strEsprimaTree
-      });
+      try {
+        var esprimaTree = esprima.parseScript(element.JsData);
+        var strEsprimaTree = JSON.stringify(esprimaTree);
+        var moduleName = esprimaTree.body[0].expression.arguments[0].value;
+        updateStr += " UPDATE dbo.MyERPDevToolsScripts SET JsModuleName='" + moduleName + "' WHERE ApplicationId='" + element.ApplicationId + "' AND JsName='" + element.JsName + "';";
+        jsTreeData.push({
+          JsPath: element.JsName,
+          JsModuleName: esprimaTree.body[0].expression.arguments[0].value,
+          JsSyntaxTreeJson: strEsprimaTree
+        });
+      } catch (err) {
+        console.log(err);
+      }
     });
     db(updateStr);
     res.send(jsTreeData);
@@ -214,6 +218,7 @@ router.post('/GetAppServicesFunction', function (req, res, next) {
 
 //获取指定模块下所有方法列表
 router.post('/GetAllFunctionByModule', function (req, res, next) {
+
   //获取指定方法源码
   async function getData(param, callback) {
     var strSqlFilter = "";
@@ -234,7 +239,6 @@ router.post('/GetAllFunctionByModule', function (req, res, next) {
       var jsData = element.JsData;
       var ast = esprima.parseScript(jsData);
       req.body.body.forEach(item => {
-
         var moduleName = ast.body[0].expression.arguments[0].value;
         if (moduleName == item.moduleName) {
           var resultItem = {

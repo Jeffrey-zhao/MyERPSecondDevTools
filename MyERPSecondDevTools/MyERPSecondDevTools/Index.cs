@@ -1,4 +1,5 @@
 ﻿using ICSharpCode.TextEditor.Document;
+using Mono.Cecil;
 using MyERPSecondDevTools.Common;
 using MyERPSecondDevTools.Decompiler;
 using MyERPSecondDevTools.Model.Enum;
@@ -17,6 +18,7 @@ using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -26,6 +28,12 @@ namespace MyERPSecondDevTools
     public partial class MyERPSecondDevTools : Form
     {
         #region 局部变量
+
+        /// <summary>
+        /// 访问的页面地址
+        /// </summary>
+        private string GoPageUrl { get; set; } = string.Empty;
+
         /// <summary>
         /// 明源ERP响应HTML
         /// </summary>
@@ -75,6 +83,7 @@ namespace MyERPSecondDevTools
         /// 后台所有程序集信息的类型聚合数据
         /// </summary>
         private List<MyERPBusinessAssemblyTypeInfo> MyERPBusinessAssemblyTypeInfos { get; set; }
+
         #endregion
 
         #region 窗体初始化
@@ -99,7 +108,6 @@ namespace MyERPSecondDevTools
             item_override.Click += Item_override_Click;
             btn_Build.Visible = false;
             btn_Copy.Visible = false;
-            btn_reGo.Enabled = false;
         }
 
         /// <summary>
@@ -249,32 +257,26 @@ namespace MyERPSecondDevTools
             }
 
             button_fiddler.Enabled = false;
-            btn_reGo.Enabled = false;
             txt_CodeView.Text = "";
-
-            var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
-            webBrowser.Navigate(url);
-            webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
-        }
-
-        /// <summary>
-        /// 再次解析页面
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void btn_reGo_Click(object sender, EventArgs e)
-        {
-            while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+            if (!GoPageUrl.Equals(txt_pageUrl.Text))
             {
-                Application.DoEvents();
+                //新地址，浏览器跳转
+                GoPageUrl = txt_pageUrl.Text;
+                var url = FiddlerHelper.GetERPNavigationPageUrl(txt_pageUrl.Text);
+                webBrowser.Navigate(url);
+                webBrowser.DocumentCompleted += new System.Windows.Forms.WebBrowserDocumentCompletedEventHandler(webBrowser1_DocumentCompleted);
             }
+            else
+            {
+                //再次解析页面
+                while (webBrowser.ReadyState != WebBrowserReadyState.Complete)
+                {
+                    Application.DoEvents();
+                }
 
-            button_fiddler.Enabled = false;
-            btn_reGo.Enabled = false;
-            txt_CodeView.Text = "";
-
-            MyERPResponseHtml = webBrowser.Document.All[1].OuterHtml;
-            HtmlAgilityPack(MyERPResponseHtml);
+                MyERPResponseHtml = webBrowser.Document.All[1].OuterHtml;
+                HtmlAgilityPack(MyERPResponseHtml);
+            }
         }
 
         /// <summary>
@@ -312,6 +314,7 @@ namespace MyERPSecondDevTools
 
                 foreach (HtmlElement td in tempDocument)
                 {
+                    //查找页面的选项卡元素，绑定点击事件
                     if (td.GetAttribute("className").Contains("mini-tab"))
                     {
                         td.Click += Td_Click;
@@ -344,6 +347,7 @@ namespace MyERPSecondDevTools
             webBrowser.Document.Body.AppendChild(ele);
             webBrowser.Document.InvokeScript("webBrowerMouse");
         }
+
         #endregion
 
         #region 解析获取的ERP网页源码数据
@@ -397,9 +401,10 @@ namespace MyERPSecondDevTools
                 //加载树
                 InitTreeData();
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 MessageBox.Show("站点访问异常，请确认能够正常访问！");
+                button_fiddler.Enabled = true;
             }
         }
 
@@ -668,13 +673,15 @@ namespace MyERPSecondDevTools
                 {
                     return total.Union(next.Types);
                 }).ToList();
+                //初始化IOC映射信息
+                FolderHelper.InitIOCMapping();
 
                 button_fiddler.Enabled = true;
-                btn_reGo.Enabled = true;
             }
             else
             {
                 MessageBox.Show("站点访问异常，请确认能够正常访问！");
+                button_fiddler.Enabled = true;
             }
         }
 
@@ -988,25 +995,6 @@ namespace MyERPSecondDevTools
                 {
                     Dictionary<string, string> referenceTypes = new Dictionary<string, string>();
                     var isExistsPublicInterface = typeInfo.Fields.Any(a => a.FieldTypeName.Contains("PublicService"));
-                    Dictionary<string, string> interfaceMapping = null;
-                    if (isExistsPublicInterface)
-                    {
-                        var appInitializer = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.AssemblyName == typeInfo.AssemblyName && p.TypeName == "AppInitializer");
-                        if(appInitializer != null)
-                        {
-                            try
-                            {
-                                var textOutPut = DecompilerHelper.GetDecompilerTypeInfo(GlobalData.ERPPath + @"\bin", appInitializer.AssemblyPath, appInitializer.TypeFullName);
-                                var appInitializerBody = textOutPut.b.ToString();
-                                interfaceMapping = DecompilerHelper.GetPublicServiceIocMapping(appInitializerBody);
-                            }
-                            catch (Exception)
-                            {
-
-                            }
-                            
-                        }
-                    }
                     typeInfo.Fields.ForEach(f =>
                     {
                         f.FieldTypeName = DecompilerHelper.GetFieldTypeName(f.FieldTypeName);
@@ -1016,13 +1004,11 @@ namespace MyERPSecondDevTools
                         }
                         if (f.FieldTypeName.EndsWith("PublicService"))
                         {
-                            var fieldTypeName = f.FieldTypeName.Contains(".") ? f.FieldTypeName.Substring(f.FieldTypeName.LastIndexOf(".")+1) : f.FieldTypeName;
-                            if (interfaceMapping != null && interfaceMapping.ContainsKey(fieldTypeName))
+                            if (isExistsPublicInterface && GlobalData.IOCMapping.ContainsKey(f.FieldTypeName))
                             {
-                                var value = interfaceMapping[fieldTypeName];
-                                var implementType = MyERPBusinessAssemblyTypeInfos.FirstOrDefault(p => p.TypeName == value);
-                                if (implementType != null)
-                                    referenceTypes.Add(f.FieldName, f.FieldTypeName);
+                                var value = GlobalData.IOCMapping[f.FieldTypeName];
+                                if (value != null)
+                                    referenceTypes.Add(f.FieldName, value);
                             }
                         }
                     });

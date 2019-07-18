@@ -28,10 +28,10 @@ namespace MyERPSecondDevTools.Decompiler
             var types = module.Types;
             foreach (var t in types)
             {
-                if (t.FullName == "Mysoft.Cbxt.PayMng.WorkFlow.HtfkApplyWfAppService")
+                if (t.FullName == "Mysoft.Cbxt.PayMng.AppInitializer")
                 {
-                    language.DecompileType(t, textOutput, decompilationOptions);
-                    Console.WriteLine(textOutput.b.ToString());
+                    //language.DecompileType(t, textOutput, decompilationOptions);
+                    //Console.WriteLine(textOutput.b.ToString());
                     var ms = t.Methods;
                     foreach (var m in ms)
                     {

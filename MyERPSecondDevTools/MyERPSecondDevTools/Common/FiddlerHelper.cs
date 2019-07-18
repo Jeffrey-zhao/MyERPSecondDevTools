@@ -28,11 +28,8 @@ namespace MyERPSecondDevTools.Common
             if (!host.ToLower().Contains("http://"))
                 host = "http://" + host;
             GlobalData.ERPHost = host;
-            //加入随机参数
-            TimeSpan ts = DateTime.UtcNow - new DateTime(1970, 1, 1, 0, 0, 0, 0);
-            long timeStamp = Convert.ToInt64(ts.TotalSeconds);
             //OA集成登录地址
-            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?{GlobalData.ERPUserCodeParamName}={GlobalData.ERPUserCode}&{GlobalData.ERPJumpPageParamName}={System.Web.HttpUtility.UrlEncode(pageUrl)}&timemp=" + timeStamp;
+            var formatRequestUrl = $"{host}/PubPlatform/Nav/Login/SSO/Login.aspx?{GlobalData.ERPUserCodeParamName}={GlobalData.ERPUserCode}&{GlobalData.ERPJumpPageParamName}={System.Web.HttpUtility.UrlEncode(pageUrl)}";
             return formatRequestUrl;
         }
 
@@ -63,12 +60,15 @@ namespace MyERPSecondDevTools.Common
                     {
                         Uri uri = new Uri(m);
                         var downLoadString = Encoding.UTF8.GetString(webClient.DownloadData(m));
-                        models.Add(new MyERPBusinessJsModel
+                        if (downLoadString.Contains("define('") || downLoadString.Contains(@"define("""))
                         {
-                            ApplicationId = applicationId,
-                            JsName = m.Substring(0, m.IndexOf("?")),
-                            JsContent = downLoadString
-                        });
+                            models.Add(new MyERPBusinessJsModel
+                            {
+                                ApplicationId = applicationId,
+                                JsName = m.Substring(0, m.IndexOf("?")),
+                                JsContent = downLoadString
+                            });
+                        }
                     }
                 }
                 catch (Exception)
