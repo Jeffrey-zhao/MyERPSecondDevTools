@@ -121,6 +121,7 @@
             this.webBrowser.Name = "webBrowser";
             this.webBrowser.Size = new System.Drawing.Size(1564, 914);
             this.webBrowser.TabIndex = 0;
+            this.webBrowser.NewWindow += new System.ComponentModel.CancelEventHandler(this.webBrowser_NewWindow);
             // 
             // tabPage2
             // 

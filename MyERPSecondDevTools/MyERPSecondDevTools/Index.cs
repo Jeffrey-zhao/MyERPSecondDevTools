@@ -293,10 +293,22 @@ namespace MyERPSecondDevTools
                 {
                     Application.DoEvents();
                 }
+
                 GoPageUrl = txt_pageUrl.Text;
                 //webBrowser事件bug，到此事件页面所有数据并未完全加载完成，借用timer不阻断webBrowser加载，执行一次，取得加载内容
                 timer_GetResponse.Start();
             }
+        }
+
+        /// <summary>
+        /// 浏览器打开新窗口事件
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void webBrowser_NewWindow(object sender, CancelEventArgs e)
+        {
+            //禁止弹出新窗口
+            e.Cancel = true;
         }
 
         /// <summary>
